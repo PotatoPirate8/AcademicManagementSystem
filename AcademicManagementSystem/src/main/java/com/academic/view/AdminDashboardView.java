@@ -1,6 +1,7 @@
 package com.academic.view;
 
-import com.academic.dao.*;
+import com.academic.controller.AdminController;
+import com.academic.controller.AdminController.OperationResult;
 import com.academic.model.*;
 import com.academic.util.*;
 
@@ -17,7 +18,6 @@ import javafx.stage.Stage;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Admin dashboard view with tabs for:
@@ -32,12 +32,7 @@ public class AdminDashboardView {
 
     private final Stage stage;
     private final BorderPane root;
-    private final UserDao userDao;
-    private final StudentDao studentDao;
-    private final LecturerDao lecturerDao;
-    private final CourseDao courseDao;
-    private final EnrollmentDao enrollmentDao;
-    private final GradeDao gradeDao;
+    private final AdminController controller;
 
     // Tables for each CRUD section
     private TableView<Student> studentsTable;
@@ -49,12 +44,7 @@ public class AdminDashboardView {
     public AdminDashboardView(Stage stage) {
         this.stage = stage;
         this.root = new BorderPane();
-        this.userDao = new UserDao();
-        this.studentDao = new StudentDao();
-        this.lecturerDao = new LecturerDao();
-        this.courseDao = new CourseDao();
-        this.enrollmentDao = new EnrollmentDao();
-        this.gradeDao = new GradeDao();
+        this.controller = new AdminController();
         buildUI();
     }
 
@@ -179,23 +169,15 @@ public class AdminDashboardView {
 
         updateBtn.setOnAction(e -> {
             Student selected = studentsTable.getSelectionModel().getSelectedItem();
-            if (selected == null) {
-                AlertUtil.showWarning("No Selection", "Please select a student to update.");
-                return;
-            }
-            if (!validateStudentForm(fnField, lnField, emailField, snField, progField)) return;
-
-            selected.setFirstName(fnField.getText().trim());
-            selected.setLastName(lnField.getText().trim());
-            selected.setEmail(emailField.getText().trim());
-            selected.setStudentNumber(snField.getText().trim().toUpperCase());
-            selected.setProgramme(progField.getText().trim());
-
-            if (studentDao.update(selected)) {
-                AlertUtil.showInfo("Success", "Student updated successfully.");
+            OperationResult result = controller.updateStudent(
+                selected, fnField.getText(), lnField.getText(),
+                emailField.getText(), snField.getText(), progField.getText()
+            );
+            if (result.isSuccess()) {
+                AlertUtil.showInfo("Success", result.getMessage());
                 refreshStudents();
             } else {
-                AlertUtil.showError("Error", "Failed to update student.");
+                AlertUtil.showError("Error", result.getMessage());
             }
         });
 
@@ -207,10 +189,11 @@ public class AdminDashboardView {
             }
             if (AlertUtil.showConfirmation("Confirm Delete",
                     "Delete student " + selected.getFullName() + "? This will also remove their user account.")) {
-                studentDao.delete(selected.getId());
-                userDao.delete(selected.getUserId());
-                refreshStudents();
-                clearFields(fnField, lnField, emailField, snField, progField);
+                OperationResult result = controller.deleteStudent(selected);
+                if (result.isSuccess()) {
+                    refreshStudents();
+                    clearFields(fnField, lnField, emailField, snField, progField);
+                }
             }
         });
 
@@ -228,29 +211,8 @@ public class AdminDashboardView {
         return tab;
     }
 
-    private boolean validateStudentForm(TextField fn, TextField ln, TextField email,
-                                         TextField sn, TextField prog) {
-        if (ValidationUtil.isNullOrEmpty(fn.getText()) || ValidationUtil.isNullOrEmpty(ln.getText())) {
-            AlertUtil.showError("Validation Error", "Name fields cannot be empty.");
-            return false;
-        }
-        if (!ValidationUtil.isValidEmail(email.getText())) {
-            AlertUtil.showError("Validation Error", "Please enter a valid email address.");
-            return false;
-        }
-        if (!ValidationUtil.isValidStudentNumber(sn.getText())) {
-            AlertUtil.showError("Validation Error", "Student number must be 4-12 alphanumeric characters.");
-            return false;
-        }
-        if (ValidationUtil.isNullOrEmpty(prog.getText())) {
-            AlertUtil.showError("Validation Error", "Programme cannot be empty.");
-            return false;
-        }
-        return true;
-    }
-
     private void refreshStudents() {
-        studentsTable.setItems(FXCollections.observableArrayList(studentDao.findAll()));
+        studentsTable.setItems(FXCollections.observableArrayList(controller.getAllStudents()));
     }
 
     // ==================== Lecturers Tab ====================
@@ -322,36 +284,30 @@ public class AdminDashboardView {
         Button clearBtn = new Button("Clear");
 
         addBtn.setOnAction(e -> {
-            if (!validateLecturerForm(fnField, lnField, emailField, deptField)) return;
-            Lecturer lecturer = new Lecturer(
-                fnField.getText().trim(), lnField.getText().trim(),
-                emailField.getText().trim(), deptField.getText().trim()
+            OperationResult result = controller.addLecturer(
+                fnField.getText(), lnField.getText(),
+                emailField.getText(), deptField.getText()
             );
-            if (lecturerDao.create(lecturer) > 0) {
-                AlertUtil.showInfo("Success", "Lecturer added successfully.");
+            if (result.isSuccess()) {
+                AlertUtil.showInfo("Success", result.getMessage());
                 refreshLecturers();
                 clearFields(fnField, lnField, emailField, deptField);
             } else {
-                AlertUtil.showError("Error", "Failed to add lecturer. Email may already exist.");
+                AlertUtil.showError("Error", result.getMessage());
             }
         });
 
         updateBtn.setOnAction(e -> {
             Lecturer selected = lecturersTable.getSelectionModel().getSelectedItem();
-            if (selected == null) {
-                AlertUtil.showWarning("No Selection", "Please select a lecturer to update.");
-                return;
-            }
-            if (!validateLecturerForm(fnField, lnField, emailField, deptField)) return;
-            selected.setFirstName(fnField.getText().trim());
-            selected.setLastName(lnField.getText().trim());
-            selected.setEmail(emailField.getText().trim());
-            selected.setDepartment(deptField.getText().trim());
-            if (lecturerDao.update(selected)) {
-                AlertUtil.showInfo("Success", "Lecturer updated successfully.");
+            OperationResult result = controller.updateLecturer(
+                selected, fnField.getText(), lnField.getText(),
+                emailField.getText(), deptField.getText()
+            );
+            if (result.isSuccess()) {
+                AlertUtil.showInfo("Success", result.getMessage());
                 refreshLecturers();
             } else {
-                AlertUtil.showError("Error", "Failed to update lecturer.");
+                AlertUtil.showError("Error", result.getMessage());
             }
         });
 
@@ -363,9 +319,11 @@ public class AdminDashboardView {
             }
             if (AlertUtil.showConfirmation("Confirm Delete",
                     "Delete lecturer " + selected.getFullName() + "?")) {
-                lecturerDao.delete(selected.getId());
-                refreshLecturers();
-                clearFields(fnField, lnField, emailField, deptField);
+                OperationResult result = controller.deleteLecturer(selected);
+                if (result.isSuccess()) {
+                    refreshLecturers();
+                    clearFields(fnField, lnField, emailField, deptField);
+                }
             }
         });
 
@@ -383,24 +341,8 @@ public class AdminDashboardView {
         return tab;
     }
 
-    private boolean validateLecturerForm(TextField fn, TextField ln, TextField email, TextField dept) {
-        if (ValidationUtil.isNullOrEmpty(fn.getText()) || ValidationUtil.isNullOrEmpty(ln.getText())) {
-            AlertUtil.showError("Validation Error", "Name fields cannot be empty.");
-            return false;
-        }
-        if (!ValidationUtil.isValidEmail(email.getText())) {
-            AlertUtil.showError("Validation Error", "Please enter a valid email address.");
-            return false;
-        }
-        if (ValidationUtil.isNullOrEmpty(dept.getText())) {
-            AlertUtil.showError("Validation Error", "Department cannot be empty.");
-            return false;
-        }
-        return true;
-    }
-
     private void refreshLecturers() {
-        lecturersTable.setItems(FXCollections.observableArrayList(lecturerDao.findAll()));
+        lecturersTable.setItems(FXCollections.observableArrayList(controller.getAllLecturers()));
     }
 
     // ==================== Courses Tab ====================
@@ -456,7 +398,7 @@ public class AdminDashboardView {
 
         ComboBox<Lecturer> lecturerCombo = new ComboBox<>();
         lecturerCombo.setPromptText("Select Lecturer");
-        lecturerCombo.setItems(FXCollections.observableArrayList(lecturerDao.findAll()));
+        lecturerCombo.setItems(FXCollections.observableArrayList(controller.getAllLecturers()));
 
         form.addRow(0, new Label("Course Code:"), codeField, new Label("Course Name:"), nameField);
         form.addRow(1, new Label("Credits:"), creditsField, new Label("Capacity:"), capacityField);
@@ -488,40 +430,32 @@ public class AdminDashboardView {
         Button clearBtn = new Button("Clear");
 
         addBtn.setOnAction(e -> {
-            if (!validateCourseForm(codeField, nameField, creditsField, capacityField, lecturerCombo)) return;
-            Course course = new Course(
-                codeField.getText().trim().toUpperCase(),
-                nameField.getText().trim(),
-                ValidationUtil.parseIntSafe(creditsField.getText()),
-                lecturerCombo.getSelectionModel().getSelectedItem().getId(),
-                ValidationUtil.parseIntSafe(capacityField.getText())
+            OperationResult result = controller.addCourse(
+                codeField.getText(), nameField.getText(),
+                creditsField.getText(), capacityField.getText(),
+                lecturerCombo.getSelectionModel().getSelectedItem()
             );
-            if (courseDao.create(course) > 0) {
-                AlertUtil.showInfo("Success", "Course added successfully.");
+            if (result.isSuccess()) {
+                AlertUtil.showInfo("Success", result.getMessage());
                 refreshCourses();
                 clearCourseForm(codeField, nameField, creditsField, capacityField, lecturerCombo);
             } else {
-                AlertUtil.showError("Error", "Failed to add course. Code may already exist.");
+                AlertUtil.showError("Error", result.getMessage());
             }
         });
 
         updateBtn.setOnAction(e -> {
             Course selected = coursesTable.getSelectionModel().getSelectedItem();
-            if (selected == null) {
-                AlertUtil.showWarning("No Selection", "Please select a course to update.");
-                return;
-            }
-            if (!validateCourseForm(codeField, nameField, creditsField, capacityField, lecturerCombo)) return;
-            selected.setCourseCode(codeField.getText().trim().toUpperCase());
-            selected.setCourseName(nameField.getText().trim());
-            selected.setCredits(ValidationUtil.parseIntSafe(creditsField.getText()));
-            selected.setMaxCapacity(ValidationUtil.parseIntSafe(capacityField.getText()));
-            selected.setLecturerId(lecturerCombo.getSelectionModel().getSelectedItem().getId());
-            if (courseDao.update(selected)) {
-                AlertUtil.showInfo("Success", "Course updated successfully.");
+            OperationResult result = controller.updateCourse(
+                selected, codeField.getText(), nameField.getText(),
+                creditsField.getText(), capacityField.getText(),
+                lecturerCombo.getSelectionModel().getSelectedItem()
+            );
+            if (result.isSuccess()) {
+                AlertUtil.showInfo("Success", result.getMessage());
                 refreshCourses();
             } else {
-                AlertUtil.showError("Error", "Failed to update course.");
+                AlertUtil.showError("Error", result.getMessage());
             }
         });
 
@@ -533,7 +467,7 @@ public class AdminDashboardView {
             }
             if (AlertUtil.showConfirmation("Confirm Delete",
                     "Delete course " + selected.getCourseCode() + "?")) {
-                courseDao.delete(selected.getId());
+                controller.deleteCourse(selected);
                 refreshCourses();
                 clearCourseForm(codeField, nameField, creditsField, capacityField, lecturerCombo);
             }
@@ -550,34 +484,6 @@ public class AdminDashboardView {
         return tab;
     }
 
-    private boolean validateCourseForm(TextField code, TextField name, TextField credits,
-                                        TextField capacity, ComboBox<Lecturer> lecturerCombo) {
-        if (!ValidationUtil.isValidCourseCode(code.getText().trim().toUpperCase())) {
-            AlertUtil.showError("Validation Error",
-                "Course code must be 2-5 letters followed by 3-5 digits (e.g., COMP1322).");
-            return false;
-        }
-        if (ValidationUtil.isNullOrEmpty(name.getText())) {
-            AlertUtil.showError("Validation Error", "Course name cannot be empty.");
-            return false;
-        }
-        int cred = ValidationUtil.parseIntSafe(credits.getText());
-        if (!ValidationUtil.isPositiveInteger(cred)) {
-            AlertUtil.showError("Validation Error", "Credits must be a positive number.");
-            return false;
-        }
-        int cap = ValidationUtil.parseIntSafe(capacity.getText());
-        if (!ValidationUtil.isPositiveInteger(cap)) {
-            AlertUtil.showError("Validation Error", "Capacity must be a positive number.");
-            return false;
-        }
-        if (lecturerCombo.getSelectionModel().getSelectedItem() == null) {
-            AlertUtil.showError("Validation Error", "Please select a lecturer.");
-            return false;
-        }
-        return true;
-    }
-
     private void clearCourseForm(TextField code, TextField name, TextField credits,
                                   TextField capacity, ComboBox<Lecturer> lecturerCombo) {
         clearFields(code, name, credits, capacity);
@@ -586,7 +492,7 @@ public class AdminDashboardView {
     }
 
     private void refreshCourses() {
-        coursesTable.setItems(FXCollections.observableArrayList(courseDao.findAll()));
+        coursesTable.setItems(FXCollections.observableArrayList(controller.getAllCourses()));
     }
 
     // ==================== Enrollments Tab ====================
@@ -633,11 +539,11 @@ public class AdminDashboardView {
 
         ComboBox<Student> studentCombo = new ComboBox<>();
         studentCombo.setPromptText("Select Student");
-        studentCombo.setItems(FXCollections.observableArrayList(studentDao.findAll()));
+        studentCombo.setItems(FXCollections.observableArrayList(controller.getAllStudents()));
 
         ComboBox<Course> courseCombo = new ComboBox<>();
         courseCombo.setPromptText("Select Course");
-        courseCombo.setItems(FXCollections.observableArrayList(courseDao.findAll()));
+        courseCombo.setItems(FXCollections.observableArrayList(controller.getAllCourses()));
 
         ComboBox<Enrollment.Status> statusCombo = new ComboBox<>();
         statusCombo.setItems(FXCollections.observableArrayList(Enrollment.Status.values()));
@@ -657,41 +563,24 @@ public class AdminDashboardView {
         addBtn.setOnAction(e -> {
             Student student = studentCombo.getSelectionModel().getSelectedItem();
             Course course = courseCombo.getSelectionModel().getSelectedItem();
-            if (student == null || course == null) {
-                AlertUtil.showWarning("Validation Error", "Please select both a student and a course.");
-                return;
-            }
-            if (enrollmentDao.isEnrolled(student.getId(), course.getId())) {
-                AlertUtil.showWarning("Already Enrolled", "This student is already enrolled in this course.");
-                return;
-            }
-            Enrollment enrollment = new Enrollment(
-                student.getId(), course.getId(), LocalDate.now(), Enrollment.Status.ENROLLED
-            );
-            if (enrollmentDao.create(enrollment) > 0) {
-                AlertUtil.showInfo("Success", "Enrollment created successfully.");
+            OperationResult result = controller.addEnrollment(student, course);
+            if (result.isSuccess()) {
+                AlertUtil.showInfo("Success", result.getMessage());
                 refreshEnrollments();
             } else {
-                AlertUtil.showError("Error", "Failed to create enrollment.");
+                AlertUtil.showError("Error", result.getMessage());
             }
         });
 
         updateStatusBtn.setOnAction(e -> {
             Enrollment selected = enrollmentsTable.getSelectionModel().getSelectedItem();
-            if (selected == null) {
-                AlertUtil.showWarning("No Selection", "Please select an enrollment to update.");
-                return;
-            }
             Enrollment.Status newStatus = statusCombo.getValue();
-            if (newStatus == null) {
-                AlertUtil.showWarning("Validation Error", "Please select a status.");
-                return;
-            }
-            if (enrollmentDao.updateStatus(selected.getId(), newStatus)) {
-                AlertUtil.showInfo("Success", "Enrollment status updated.");
+            OperationResult result = controller.updateEnrollmentStatus(selected, newStatus);
+            if (result.isSuccess()) {
+                AlertUtil.showInfo("Success", result.getMessage());
                 refreshEnrollments();
             } else {
-                AlertUtil.showError("Error", "Failed to update status.");
+                AlertUtil.showError("Error", result.getMessage());
             }
         });
 
@@ -702,7 +591,7 @@ public class AdminDashboardView {
                 return;
             }
             if (AlertUtil.showConfirmation("Confirm Delete", "Delete this enrollment?")) {
-                enrollmentDao.delete(selected.getId());
+                controller.deleteEnrollment(selected);
                 refreshEnrollments();
             }
         });
@@ -717,7 +606,7 @@ public class AdminDashboardView {
     }
 
     private void refreshEnrollments() {
-        enrollmentsTable.setItems(FXCollections.observableArrayList(enrollmentDao.findAll()));
+        enrollmentsTable.setItems(FXCollections.observableArrayList(controller.getAllEnrollments()));
     }
 
     // ==================== Grades Tab ====================
@@ -768,7 +657,7 @@ public class AdminDashboardView {
 
         ComboBox<Enrollment> enrollmentCombo = new ComboBox<>();
         enrollmentCombo.setPromptText("Select Enrollment");
-        enrollmentCombo.setItems(FXCollections.observableArrayList(enrollmentDao.findAll()));
+        enrollmentCombo.setItems(FXCollections.observableArrayList(controller.getAllEnrollments()));
         enrollmentCombo.setPrefWidth(300);
 
         TextField gradeField = new TextField();
@@ -802,55 +691,28 @@ public class AdminDashboardView {
 
         addBtn.setOnAction(e -> {
             Enrollment enrollment = enrollmentCombo.getSelectionModel().getSelectedItem();
-            if (enrollment == null) {
-                AlertUtil.showWarning("Validation Error", "Please select an enrollment.");
-                return;
-            }
-            double gradeValue = ValidationUtil.parseDoubleSafe(gradeField.getText());
-            if (!ValidationUtil.isValidGrade(gradeValue)) {
-                AlertUtil.showError("Validation Error", "Grade must be between 0 and 100.");
-                return;
-            }
-            if (gradeDao.existsForEnrollment(enrollment.getId())) {
-                AlertUtil.showWarning("Grade Exists",
-                    "A grade already exists for this enrollment. Use 'Update Grade' instead.");
-                return;
-            }
-            Grade grade = new Grade(
-                enrollment.getId(), gradeValue,
-                Grade.calculateGradeLetter(gradeValue),
-                feedbackArea.getText().trim(),
-                LocalDate.now()
+            OperationResult result = controller.addGrade(
+                enrollment, gradeField.getText(), feedbackArea.getText()
             );
-            if (gradeDao.create(grade) > 0) {
-                AlertUtil.showInfo("Success", "Grade assigned successfully.");
+            if (result.isSuccess()) {
+                AlertUtil.showInfo("Success", result.getMessage());
                 refreshGrades();
                 clearGradeForm(gradeField, feedbackArea, enrollmentCombo);
             } else {
-                AlertUtil.showError("Error", "Failed to assign grade.");
+                AlertUtil.showError("Error", result.getMessage());
             }
         });
 
         updateBtn.setOnAction(e -> {
             Grade selected = gradesTable.getSelectionModel().getSelectedItem();
-            if (selected == null) {
-                AlertUtil.showWarning("No Selection", "Please select a grade to update.");
-                return;
-            }
-            double gradeValue = ValidationUtil.parseDoubleSafe(gradeField.getText());
-            if (!ValidationUtil.isValidGrade(gradeValue)) {
-                AlertUtil.showError("Validation Error", "Grade must be between 0 and 100.");
-                return;
-            }
-            selected.setGradeValue(gradeValue);
-            selected.setGradeLetter(Grade.calculateGradeLetter(gradeValue));
-            selected.setFeedback(feedbackArea.getText().trim());
-            selected.setGradedDate(LocalDate.now());
-            if (gradeDao.update(selected)) {
-                AlertUtil.showInfo("Success", "Grade updated successfully.");
+            OperationResult result = controller.updateGrade(
+                selected, gradeField.getText(), feedbackArea.getText()
+            );
+            if (result.isSuccess()) {
+                AlertUtil.showInfo("Success", result.getMessage());
                 refreshGrades();
             } else {
-                AlertUtil.showError("Error", "Failed to update grade.");
+                AlertUtil.showError("Error", result.getMessage());
             }
         });
 
@@ -861,7 +723,7 @@ public class AdminDashboardView {
                 return;
             }
             if (AlertUtil.showConfirmation("Confirm Delete", "Delete this grade?")) {
-                gradeDao.delete(selected.getId());
+                controller.deleteGrade(selected);
                 refreshGrades();
                 clearGradeForm(gradeField, feedbackArea, enrollmentCombo);
             }
@@ -887,7 +749,7 @@ public class AdminDashboardView {
     }
 
     private void refreshGrades() {
-        gradesTable.setItems(FXCollections.observableArrayList(gradeDao.findAll()));
+        gradesTable.setItems(FXCollections.observableArrayList(controller.getAllGrades()));
     }
 
     // ==================== Reports Tab ====================
@@ -939,7 +801,7 @@ public class AdminDashboardView {
                 case "Grade Distribution by Course" -> {
                     ComboBox<Course> courseCombo = new ComboBox<>();
                     courseCombo.setPromptText("Select Course");
-                    courseCombo.setItems(FXCollections.observableArrayList(courseDao.findAll()));
+                    courseCombo.setItems(FXCollections.observableArrayList(controller.getAllCourses()));
                     courseCombo.setId("courseFilter");
                     filterBox.getChildren().addAll(new Label("Filter by Course:"), courseCombo);
                 }
@@ -955,7 +817,7 @@ public class AdminDashboardView {
                 case "Student Transcript" -> {
                     ComboBox<Student> studentCombo = new ComboBox<>();
                     studentCombo.setPromptText("Select Student");
-                    studentCombo.setItems(FXCollections.observableArrayList(studentDao.findAll()));
+                    studentCombo.setItems(FXCollections.observableArrayList(controller.getAllStudents()));
                     studentCombo.setId("studentFilter");
                     filterBox.getChildren().addAll(new Label("Select Student:"), studentCombo);
                 }
@@ -979,158 +841,42 @@ public class AdminDashboardView {
 
     /** Generates the selected report and writes it to the output area */
     private void generateReport(String reportType, VBox filterBox, TextArea output) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("============================================\n");
-        sb.append("  ").append(reportType.toUpperCase()).append("\n");
-        sb.append("  Generated: ").append(LocalDate.now()).append("\n");
-        sb.append("============================================\n\n");
+        // Extract filter values from the dynamic filter controls
+        Course course = null;
+        LocalDate fromDate = null;
+        LocalDate toDate = null;
+        Student student = null;
 
-        switch (reportType) {
-            case "Average Grade by Course" -> generateAvgGradeReport(sb);
-            case "Grade Distribution by Course" -> generateDistributionReport(sb, filterBox);
-            case "Enrollment Statistics" -> generateEnrollmentReport(sb);
-            case "Grades by Date Range" -> generateDateRangeReport(sb, filterBox);
-            case "Student Transcript" -> generateTranscriptReport(sb, filterBox);
-            default -> sb.append("Unknown report type.\n");
+        if (controller.requiresCourseFilter(reportType)) {
+            ComboBox<Course> courseCombo = findComboBox(filterBox, "courseFilter");
+            if (courseCombo == null || courseCombo.getValue() == null) {
+                AlertUtil.showWarning("Filter Required", "Please select a course.");
+                return;
+            }
+            course = courseCombo.getValue();
+        } else if (controller.requiresDateRangeFilter(reportType)) {
+            DatePicker fromPicker = findDatePicker(filterBox, "fromDate");
+            DatePicker toPicker = findDatePicker(filterBox, "toDate");
+            if (fromPicker == null || toPicker == null ||
+                fromPicker.getValue() == null || toPicker.getValue() == null) {
+                AlertUtil.showWarning("Filter Required", "Please select a date range.");
+                return;
+            }
+            fromDate = fromPicker.getValue();
+            toDate = toPicker.getValue();
+        } else if (controller.requiresStudentFilter(reportType)) {
+            ComboBox<Student> studentCombo = findComboBox(filterBox, "studentFilter");
+            if (studentCombo == null || studentCombo.getValue() == null) {
+                AlertUtil.showWarning("Filter Required", "Please select a student.");
+                return;
+            }
+            student = studentCombo.getValue();
         }
 
-        output.setText(sb.toString());
-    }
-
-    /** Report: Average grade per course */
-    private void generateAvgGradeReport(StringBuilder sb) {
-        Map<String, Double> averages = gradeDao.getAverageGradeByCourse();
-        if (averages.isEmpty()) {
-            sb.append("No grade data available.\n");
-            return;
+        String reportText = controller.generateReport(reportType, course, fromDate, toDate, student);
+        if (reportText != null) {
+            output.setText(reportText);
         }
-        sb.append(String.format("%-35s  %s\n", "Course", "Average Grade"));
-        sb.append("----------------------------------------------\n");
-        for (Map.Entry<String, Double> entry : averages.entrySet()) {
-            sb.append(String.format("%-35s  %.1f (%s)\n",
-                entry.getKey(), entry.getValue(),
-                Grade.calculateGradeLetter(entry.getValue())));
-        }
-    }
-
-    /** Report: Grade distribution for a selected course */
-    private void generateDistributionReport(StringBuilder sb, VBox filterBox) {
-        ComboBox<Course> courseCombo = findComboBox(filterBox, "courseFilter");
-        if (courseCombo == null || courseCombo.getValue() == null) {
-            AlertUtil.showWarning("Filter Required", "Please select a course.");
-            return;
-        }
-        Course course = courseCombo.getValue();
-        Map<String, Integer> distribution = gradeDao.getGradeDistribution(course.getId());
-        Map<String, Object> stats = gradeDao.getCourseGradeStats(course.getId());
-
-        sb.append("Course: ").append(course.getCourseCode())
-          .append(" - ").append(course.getCourseName()).append("\n\n");
-
-        sb.append("Grade Distribution:\n");
-        sb.append("----------------------\n");
-        for (String letter : new String[]{"A", "B", "C", "D", "F"}) {
-            int count = distribution.getOrDefault(letter, 0);
-            String bar = "#".repeat(count);
-            sb.append(String.format("  %s: %d %s\n", letter, count, bar));
-        }
-
-        sb.append("\nStatistics:\n");
-        sb.append("----------------------\n");
-        sb.append(String.format("  Total Graded:  %d\n", stats.getOrDefault("total", 0)));
-        sb.append(String.format("  Average:       %.1f\n", stats.getOrDefault("average", 0.0)));
-        sb.append(String.format("  Maximum:       %.1f\n", stats.getOrDefault("maximum", 0.0)));
-        sb.append(String.format("  Minimum:       %.1f\n", stats.getOrDefault("minimum", 0.0)));
-    }
-
-    /** Report: Enrollment counts by status and per course */
-    private void generateEnrollmentReport(StringBuilder sb) {
-        Map<String, Integer> statusCounts = gradeDao.getEnrollmentStatusCounts();
-        sb.append("Enrollment Status Summary:\n");
-        sb.append("--------------------------\n");
-        int total = 0;
-        for (Map.Entry<String, Integer> entry : statusCounts.entrySet()) {
-            sb.append(String.format("  %-12s: %d\n", entry.getKey(), entry.getValue()));
-            total += entry.getValue();
-        }
-        sb.append(String.format("\n  Total Enrollments: %d\n", total));
-
-        sb.append("\nEnrollments per Course:\n");
-        sb.append("--------------------------------------\n");
-        List<Course> courses = courseDao.findAll();
-        for (Course course : courses) {
-            int count = courseDao.getEnrollmentCount(course.getId());
-            sb.append(String.format("  %-30s: %d / %d\n",
-                course.getCourseCode() + " - " + course.getCourseName(),
-                count, course.getMaxCapacity()));
-        }
-    }
-
-    /** Report: Grades filtered by date range */
-    private void generateDateRangeReport(StringBuilder sb, VBox filterBox) {
-        DatePicker fromPicker = findDatePicker(filterBox, "fromDate");
-        DatePicker toPicker = findDatePicker(filterBox, "toDate");
-        if (fromPicker == null || toPicker == null ||
-            fromPicker.getValue() == null || toPicker.getValue() == null) {
-            AlertUtil.showWarning("Filter Required", "Please select a date range.");
-            return;
-        }
-
-        List<Grade> grades = gradeDao.findByDateRange(fromPicker.getValue(), toPicker.getValue());
-        sb.append(String.format("Period: %s to %s\n\n", fromPicker.getValue(), toPicker.getValue()));
-
-        if (grades.isEmpty()) {
-            sb.append("No grades found for the selected period.\n");
-            return;
-        }
-
-        sb.append(String.format("%-18s %-10s %-6s %-6s %s\n",
-            "Student", "Course", "Grade", "Letter", "Date"));
-        sb.append("--------------------------------------------------------\n");
-        for (Grade grade : grades) {
-            sb.append(String.format("%-18s %-10s %-6.1f %-6s %s\n",
-                grade.getStudentName(), grade.getCourseCode(),
-                grade.getGradeValue(), grade.getGradeLetter(),
-                grade.getGradedDate()));
-        }
-        sb.append(String.format("\nTotal Records: %d\n", grades.size()));
-    }
-
-    /** Report: Full transcript for a selected student */
-    private void generateTranscriptReport(StringBuilder sb, VBox filterBox) {
-        ComboBox<Student> studentCombo = findComboBox(filterBox, "studentFilter");
-        if (studentCombo == null || studentCombo.getValue() == null) {
-            AlertUtil.showWarning("Filter Required", "Please select a student.");
-            return;
-        }
-        Student student = studentCombo.getValue();
-        List<Grade> grades = gradeDao.findByStudentId(student.getId());
-
-        sb.append("Student: ").append(student.getFullName()).append("\n");
-        sb.append("Student Number: ").append(student.getStudentNumber()).append("\n");
-        sb.append("Programme: ").append(student.getProgramme()).append("\n\n");
-
-        if (grades.isEmpty()) {
-            sb.append("No grades recorded for this student.\n");
-            return;
-        }
-
-        sb.append(String.format("%-10s %-25s %-8s %-6s %s\n",
-            "Code", "Course Name", "Grade", "Letter", "Feedback"));
-        sb.append("--------------------------------------------------------------\n");
-        double totalGrade = 0;
-        for (Grade grade : grades) {
-            sb.append(String.format("%-10s %-25s %-8.1f %-6s %s\n",
-                grade.getCourseCode(), grade.getCourseName(),
-                grade.getGradeValue(), grade.getGradeLetter(),
-                grade.getFeedback() != null ? grade.getFeedback() : ""));
-            totalGrade += grade.getGradeValue();
-        }
-        double average = totalGrade / grades.size();
-        sb.append("\n--------------------------------------------------------------\n");
-        sb.append(String.format("Overall Average: %.1f (%s)\n", average,
-            Grade.calculateGradeLetter(average)));
-        sb.append(String.format("Total Courses Graded: %d\n", grades.size()));
     }
 
     // ==================== Utility Methods ====================
@@ -1169,7 +915,7 @@ public class AdminDashboardView {
 
     /** Handles logout */
     private void handleLogout() {
-        SessionManager.logout();
+        controller.logout();
         LoginView loginView = new LoginView(stage);
         Scene scene = new Scene(loginView.getRoot(), 400, 550);
         scene.getStylesheets().add(

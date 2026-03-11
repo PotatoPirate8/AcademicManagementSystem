@@ -1,6 +1,7 @@
 package com.academic.view;
 
-import com.academic.dao.*;
+import com.academic.controller.StudentController;
+import com.academic.controller.StudentController.OperationResult;
 import com.academic.model.*;
 import com.academic.util.*;
 
@@ -28,10 +29,7 @@ public class StudentDashboardView {
 
     private final Stage stage;
     private final BorderPane root;
-    private final StudentDao studentDao;
-    private final CourseDao courseDao;
-    private final EnrollmentDao enrollmentDao;
-    private final GradeDao gradeDao;
+    private final StudentController controller;
     private Student currentStudent;
 
     // Tables that need periodic refreshing
@@ -42,11 +40,8 @@ public class StudentDashboardView {
     public StudentDashboardView(Stage stage) {
         this.stage = stage;
         this.root = new BorderPane();
-        this.studentDao = new StudentDao();
-        this.courseDao = new CourseDao();
-        this.enrollmentDao = new EnrollmentDao();
-        this.gradeDao = new GradeDao();
-        this.currentStudent = SessionManager.getCurrentStudent();
+        this.controller = new StudentController();
+        this.currentStudent = controller.getCurrentStudent();
         buildUI();
     }
 
@@ -265,35 +260,16 @@ public class StudentDashboardView {
             String email = emailField.getText().trim();
             String programme = programmeField.getText().trim();
 
-            // Validate inputs
-            if (ValidationUtil.isNullOrEmpty(firstName) || ValidationUtil.isNullOrEmpty(lastName)) {
-                statusLabel.setStyle("-fx-text-fill: #e74c3c;");
-                statusLabel.setText("Name cannot be empty.");
-                return;
-            }
-            if (!ValidationUtil.isValidEmail(email)) {
-                statusLabel.setStyle("-fx-text-fill: #e74c3c;");
-                statusLabel.setText("Please enter a valid email.");
-                return;
-            }
-            if (ValidationUtil.isNullOrEmpty(programme)) {
-                statusLabel.setStyle("-fx-text-fill: #e74c3c;");
-                statusLabel.setText("Programme cannot be empty.");
-                return;
-            }
+            OperationResult result = controller.updateProfile(
+                currentStudent, firstName, lastName, email, programme
+            );
 
-            currentStudent.setFirstName(firstName);
-            currentStudent.setLastName(lastName);
-            currentStudent.setEmail(email);
-            currentStudent.setProgramme(programme);
-
-            if (studentDao.update(currentStudent)) {
+            if (result.isSuccess()) {
                 statusLabel.setStyle("-fx-text-fill: #27ae60;");
-                statusLabel.setText("Profile updated successfully.");
             } else {
                 statusLabel.setStyle("-fx-text-fill: #e74c3c;");
-                statusLabel.setText("Failed to update profile.");
             }
+            statusLabel.setText(result.getMessage());
         });
 
         content.getChildren().addAll(profileTitle, form, updateButton, statusLabel);
@@ -306,20 +282,20 @@ public class StudentDashboardView {
     private void refreshMyCourses() {
         if (currentStudent == null) return;
         ObservableList<Enrollment> enrollments = FXCollections.observableArrayList(
-            enrollmentDao.findByStudentId(currentStudent.getId())
+            controller.getMyEnrollments(currentStudent.getId())
         );
         myCoursesTable.setItems(enrollments);
     }
 
     private void refreshAvailableCourses() {
-        ObservableList<Course> courses = FXCollections.observableArrayList(courseDao.findAll());
+        ObservableList<Course> courses = FXCollections.observableArrayList(controller.getAllCourses());
         availableCoursesTable.setItems(courses);
     }
 
     private void refreshGrades() {
         if (currentStudent == null) return;
         ObservableList<Grade> grades = FXCollections.observableArrayList(
-            gradeDao.findByStudentId(currentStudent.getId())
+            controller.getMyGrades(currentStudent.getId())
         );
         gradesTable.setItems(grades);
     }
@@ -329,39 +305,14 @@ public class StudentDashboardView {
     /** Handles course enrollment with validation and capacity check */
     private void handleEnroll() {
         Course selected = availableCoursesTable.getSelectionModel().getSelectedItem();
-        if (selected == null) {
-            AlertUtil.showWarning("No Selection", "Please select a course to enroll in.");
-            return;
-        }
-        if (currentStudent == null) {
-            AlertUtil.showError("Error", "Student profile not found.");
-            return;
-        }
+        OperationResult result = controller.enroll(currentStudent, selected);
 
-        // Check if already enrolled
-        if (enrollmentDao.isEnrolled(currentStudent.getId(), selected.getId())) {
-            AlertUtil.showWarning("Already Enrolled", "You are already enrolled in this course.");
-            return;
-        }
-
-        // Check course capacity
-        int enrolled = courseDao.getEnrollmentCount(selected.getId());
-        if (enrolled >= selected.getMaxCapacity()) {
-            AlertUtil.showWarning("Course Full", "This course has reached its maximum capacity.");
-            return;
-        }
-
-        Enrollment enrollment = new Enrollment(
-            currentStudent.getId(), selected.getId(),
-            LocalDate.now(), Enrollment.Status.ENROLLED
-        );
-
-        if (enrollmentDao.create(enrollment) > 0) {
-            AlertUtil.showInfo("Success", "Successfully enrolled in " + selected.getCourseCode() + ".");
+        if (result.isSuccess()) {
+            AlertUtil.showInfo("Success", result.getMessage());
             refreshMyCourses();
             refreshAvailableCourses();
         } else {
-            AlertUtil.showError("Error", "Failed to enroll. Please try again.");
+            AlertUtil.showWarning("Cannot Enroll", result.getMessage());
         }
     }
 
@@ -372,25 +323,22 @@ public class StudentDashboardView {
             AlertUtil.showWarning("No Selection", "Please select an enrollment to withdraw from.");
             return;
         }
-        if (selected.getStatus() != Enrollment.Status.ENROLLED) {
-            AlertUtil.showWarning("Cannot Withdraw", "You can only withdraw from active enrollments.");
-            return;
-        }
 
         if (AlertUtil.showConfirmation("Confirm Withdrawal",
                 "Are you sure you want to withdraw from " + selected.getCourseCode() + "?")) {
-            if (enrollmentDao.updateStatus(selected.getId(), Enrollment.Status.WITHDRAWN)) {
-                AlertUtil.showInfo("Success", "Successfully withdrawn from the course.");
+            OperationResult result = controller.withdraw(selected);
+            if (result.isSuccess()) {
+                AlertUtil.showInfo("Success", result.getMessage());
                 refreshMyCourses();
             } else {
-                AlertUtil.showError("Error", "Failed to withdraw. Please try again.");
+                AlertUtil.showWarning("Cannot Withdraw", result.getMessage());
             }
         }
     }
 
     /** Handles logout by clearing session and returning to login */
     private void handleLogout() {
-        SessionManager.logout();
+        controller.logout();
         LoginView loginView = new LoginView(stage);
         Scene scene = new Scene(loginView.getRoot(), 400, 550);
         scene.getStylesheets().add(

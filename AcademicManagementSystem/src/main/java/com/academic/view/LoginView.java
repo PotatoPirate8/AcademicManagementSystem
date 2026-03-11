@@ -1,8 +1,8 @@
 package com.academic.view;
 
-import com.academic.dao.StudentDao;
-import com.academic.dao.UserDao;
-import com.academic.model.Student;
+import com.academic.controller.LoginController;
+import com.academic.controller.LoginController.LoginResult;
+import com.academic.controller.LoginController.RegisterResult;
 import com.academic.model.User;
 import com.academic.util.*;
 
@@ -23,14 +23,12 @@ public class LoginView {
 
     private final Stage stage;
     private final BorderPane root;
-    private final UserDao userDao;
-    private final StudentDao studentDao;
+    private final LoginController controller;
 
     public LoginView(Stage stage) {
         this.stage = stage;
         this.root = new BorderPane();
-        this.userDao = new UserDao();
-        this.studentDao = new StudentDao();
+        this.controller = new LoginController();
         buildLoginForm();
     }
 
@@ -105,28 +103,15 @@ public class LoginView {
 
     /** Validates credentials and navigates to the appropriate dashboard */
     private void handleLogin(String username, String password, Label errorLabel) {
-        // Input validation
-        if (ValidationUtil.isNullOrEmpty(username) || ValidationUtil.isNullOrEmpty(password)) {
-            errorLabel.setText("Please enter both username and password.");
+        LoginResult result = controller.login(username, password);
+
+        if (!result.isSuccess()) {
+            errorLabel.setText(result.getErrorMessage());
             return;
         }
-
-        // Authenticate against database
-        String hash = PasswordUtil.hashPassword(password);
-        User user = userDao.authenticate(username, hash);
-
-        if (user == null) {
-            errorLabel.setText("Invalid username or password.");
-            return;
-        }
-
-        // Set the session
-        SessionManager.login(user);
 
         // Route to the correct dashboard based on role
-        if (user.getRole() == User.Role.STUDENT) {
-            Student student = studentDao.findByUserId(user.getId());
-            SessionManager.setCurrentStudent(student);
+        if (result.getUser().getRole() == User.Role.STUDENT) {
             showStudentDashboard();
         } else {
             showAdminDashboard();
@@ -212,63 +197,14 @@ public class LoginView {
     private void handleRegister(String username, String password, String confirmPassword,
                                 String firstName, String lastName, String email,
                                 String studentNumber, String programme, Label errorLabel) {
-        // Validate all fields one by one for clear error messages
-        if (!ValidationUtil.isValidUsername(username)) {
-            errorLabel.setText("Username must be 3-20 alphanumeric characters.");
-            return;
-        }
-        if (!ValidationUtil.isValidPassword(password)) {
-            errorLabel.setText("Password must be at least 6 characters.");
-            return;
-        }
-        if (!password.equals(confirmPassword)) {
-            errorLabel.setText("Passwords do not match.");
-            return;
-        }
-        if (ValidationUtil.isNullOrEmpty(firstName) || ValidationUtil.isNullOrEmpty(lastName)) {
-            errorLabel.setText("Please enter your full name.");
-            return;
-        }
-        if (!ValidationUtil.isValidEmail(email)) {
-            errorLabel.setText("Please enter a valid email address.");
-            return;
-        }
-        if (!ValidationUtil.isValidStudentNumber(studentNumber)) {
-            errorLabel.setText("Student number must be 4-12 alphanumeric characters.");
-            return;
-        }
-        if (ValidationUtil.isNullOrEmpty(programme)) {
-            errorLabel.setText("Please enter your programme.");
-            return;
-        }
-
-        // Check if username is already taken
-        if (userDao.findByUsername(username) != null) {
-            errorLabel.setText("Username already taken. Please choose another.");
-            return;
-        }
-
-        // Create user account
-        String hash = PasswordUtil.hashPassword(password);
-        User user = new User(username, hash, User.Role.STUDENT);
-        int userId = userDao.create(user);
-
-        if (userId == -1) {
-            errorLabel.setText("Registration failed. Please try again.");
-            return;
-        }
-
-        // Create student profile
-        Student student = new Student(
-            userId, firstName.trim(), lastName.trim(),
-            email.trim(), studentNumber.trim().toUpperCase(), programme.trim()
+        RegisterResult result = controller.register(
+            username, password, confirmPassword,
+            firstName, lastName, email,
+            studentNumber, programme
         );
-        int studentId = studentDao.create(student);
 
-        if (studentId == -1) {
-            // Rollback user if student creation fails
-            userDao.delete(userId);
-            errorLabel.setText("Registration failed. Student number may already exist.");
+        if (!result.isSuccess()) {
+            errorLabel.setText(result.getErrorMessage());
             return;
         }
 
