@@ -143,10 +143,18 @@ public class AdminDashboardView {
         snField.setPromptText("Student Number");
         TextField progField = new TextField();
         progField.setPromptText("Programme");
+        TextField usernameField = new TextField();
+        usernameField.setPromptText("Username");
+        PasswordField passwordField = new PasswordField();
+        passwordField.setPromptText("Password");
+        PasswordField confirmPasswordField = new PasswordField();
+        confirmPasswordField.setPromptText("Confirm Password");
 
-        form.addRow(0, new Label("First Name:"), fnField, new Label("Last Name:"), lnField);
-        form.addRow(1, new Label("Email:"), emailField, new Label("Student No:"), snField);
-        form.addRow(2, new Label("Programme:"), progField);
+        form.addRow(0, new Label("Username:"), usernameField, new Label("Password:"), passwordField);
+        form.addRow(1, new Label(""), new Label(""), new Label("Confirm Password:"), confirmPasswordField);
+        form.addRow(2, new Label("First Name:"), fnField, new Label("Last Name:"), lnField);
+        form.addRow(3, new Label("Email:"), emailField, new Label("Student No:"), snField);
+        form.addRow(4, new Label("Programme:"), progField);
 
         // Populate form when a row is selected
         studentsTable.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
@@ -161,11 +169,32 @@ public class AdminDashboardView {
 
         // Action buttons
         HBox buttons = new HBox(10);
+        Button addBtn = new Button("Add");
+        addBtn.getStyleClass().add("success-button");
         Button updateBtn = new Button("Update");
         updateBtn.getStyleClass().add("primary-button");
         Button deleteBtn = new Button("Delete");
         deleteBtn.getStyleClass().add("danger-button");
         Button clearBtn = new Button("Clear");
+
+        addBtn.setOnAction(e -> {
+            if (!passwordField.getText().equals(confirmPasswordField.getText())) {
+                AlertUtil.showError("Error", "Passwords do not match.");
+                return;
+            }
+            OperationResult result = controller.addStudent(
+                usernameField.getText(), passwordField.getText(),
+                fnField.getText(), lnField.getText(),
+                emailField.getText(), snField.getText(), progField.getText()
+            );
+            if (result.isSuccess()) {
+                AlertUtil.showInfo("Success", result.getMessage());
+                refreshStudents();
+                clearFields(usernameField, passwordField, confirmPasswordField, fnField, lnField, emailField, snField, progField);
+            } else {
+                AlertUtil.showError("Error", result.getMessage());
+            }
+        });
 
         updateBtn.setOnAction(e -> {
             Student selected = studentsTable.getSelectionModel().getSelectedItem();
@@ -198,11 +227,11 @@ public class AdminDashboardView {
         });
 
         clearBtn.setOnAction(e -> {
-            clearFields(fnField, lnField, emailField, snField, progField);
+            clearFields(usernameField, passwordField, confirmPasswordField, fnField, lnField, emailField, snField, progField);
             studentsTable.getSelectionModel().clearSelection();
         });
 
-        buttons.getChildren().addAll(updateBtn, deleteBtn, clearBtn);
+        buttons.getChildren().addAll(addBtn, updateBtn, deleteBtn, clearBtn);
         refreshStudents();
 
         content.getChildren().addAll(studentsTable, form, buttons);

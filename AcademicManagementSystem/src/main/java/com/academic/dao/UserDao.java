@@ -36,15 +36,16 @@ public class UserDao {
     /** Creates a new user account and returns the generated ID */
     public int create(User user) {
         String sql = "INSERT INTO users (username, password_hash, role) VALUES (?, ?, ?)";
-        try (PreparedStatement stmt = dbManager.getConnection().prepareStatement(sql,
-                Statement.RETURN_GENERATED_KEYS)) {
+        try (PreparedStatement stmt = dbManager.getConnection().prepareStatement(sql)) {
             stmt.setString(1, user.getUsername());
             stmt.setString(2, user.getPasswordHash());
             stmt.setString(3, user.getRole().name());
             stmt.executeUpdate();
-            ResultSet keys = stmt.getGeneratedKeys();
-            if (keys.next()) {
-                return keys.getInt(1);
+            try (ResultSet keys = dbManager.getConnection().createStatement()
+                    .executeQuery("SELECT last_insert_rowid()")) {
+                if (keys.next()) {
+                    return keys.getInt(1);
+                }
             }
         } catch (SQLException e) {
             System.err.println("Error creating user: " + e.getMessage());

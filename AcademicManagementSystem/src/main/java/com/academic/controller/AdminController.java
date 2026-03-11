@@ -2,6 +2,7 @@ package com.academic.controller;
 
 import com.academic.dao.*;
 import com.academic.model.*;
+import com.academic.util.PasswordUtil;
 import com.academic.util.SessionManager;
 import com.academic.util.ValidationUtil;
 
@@ -91,6 +92,49 @@ public class AdminController {
             return OperationResult.success("Student updated successfully.");
         }
         return OperationResult.failure("Failed to update student.");
+    }
+
+    public OperationResult addStudent(String username, String password, String firstName,
+                                       String lastName, String email, String studentNumber, String programme) {
+        if (!ValidationUtil.isValidUsername(username)) {
+            return OperationResult.failure("Username must be 3-20 alphanumeric characters.");
+        }
+        if (!ValidationUtil.isValidPassword(password)) {
+            return OperationResult.failure("Password must be at least 6 characters.");
+        }
+        if (ValidationUtil.isNullOrEmpty(firstName) || ValidationUtil.isNullOrEmpty(lastName)) {
+            return OperationResult.failure("Name fields cannot be empty.");
+        }
+        if (!ValidationUtil.isValidEmail(email)) {
+            return OperationResult.failure("Please enter a valid email address.");
+        }
+        if (!ValidationUtil.isValidStudentNumber(studentNumber)) {
+            return OperationResult.failure("Student number must be 4-12 alphanumeric characters.");
+        }
+        if (ValidationUtil.isNullOrEmpty(programme)) {
+            return OperationResult.failure("Programme cannot be empty.");
+        }
+        if (userDao.findByUsername(username) != null) {
+            return OperationResult.failure("Username already taken.");
+        }
+
+        String hash = PasswordUtil.hashPassword(password);
+        User user = new User(username, hash, User.Role.STUDENT);
+        int userId = userDao.create(user);
+        if (userId == -1) {
+            return OperationResult.failure("Failed to create user account.");
+        }
+
+        Student student = new Student(
+            userId, firstName.trim(), lastName.trim(),
+            email.trim(), studentNumber.trim().toUpperCase(), programme.trim()
+        );
+        int studentId = studentDao.create(student);
+        if (studentId == -1) {
+            userDao.delete(userId);
+            return OperationResult.failure("Failed to create student. Student number may already exist.");
+        }
+        return OperationResult.success("Student added successfully.");
     }
 
     public OperationResult deleteStudent(Student student) {

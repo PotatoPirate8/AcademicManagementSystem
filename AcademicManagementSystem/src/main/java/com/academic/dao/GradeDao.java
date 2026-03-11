@@ -25,17 +25,18 @@ public class GradeDao {
     public int create(Grade grade) {
         String sql = "INSERT INTO grades (enrollment_id, grade_value, grade_letter, feedback, graded_date) " +
                      "VALUES (?, ?, ?, ?, ?)";
-        try (PreparedStatement stmt = dbManager.getConnection().prepareStatement(sql,
-                Statement.RETURN_GENERATED_KEYS)) {
+        try (PreparedStatement stmt = dbManager.getConnection().prepareStatement(sql)) {
             stmt.setInt(1, grade.getEnrollmentId());
             stmt.setDouble(2, grade.getGradeValue());
             stmt.setString(3, grade.getGradeLetter());
             stmt.setString(4, grade.getFeedback());
             stmt.setString(5, grade.getGradedDate().toString());
             stmt.executeUpdate();
-            ResultSet keys = stmt.getGeneratedKeys();
-            if (keys.next()) {
-                return keys.getInt(1);
+            try (ResultSet keys = dbManager.getConnection().createStatement()
+                    .executeQuery("SELECT last_insert_rowid()")) {
+                if (keys.next()) {
+                    return keys.getInt(1);
+                }
             }
         } catch (SQLException e) {
             System.err.println("Error creating grade: " + e.getMessage());

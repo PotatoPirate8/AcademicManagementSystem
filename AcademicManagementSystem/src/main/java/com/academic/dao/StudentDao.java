@@ -21,8 +21,7 @@ public class StudentDao {
     public int create(Student student) {
         String sql = "INSERT INTO students (user_id, first_name, last_name, email, student_number, programme) " +
                      "VALUES (?, ?, ?, ?, ?, ?)";
-        try (PreparedStatement stmt = dbManager.getConnection().prepareStatement(sql,
-                Statement.RETURN_GENERATED_KEYS)) {
+        try (PreparedStatement stmt = dbManager.getConnection().prepareStatement(sql)) {
             stmt.setInt(1, student.getUserId());
             stmt.setString(2, student.getFirstName());
             stmt.setString(3, student.getLastName());
@@ -30,9 +29,11 @@ public class StudentDao {
             stmt.setString(5, student.getStudentNumber());
             stmt.setString(6, student.getProgramme());
             stmt.executeUpdate();
-            ResultSet keys = stmt.getGeneratedKeys();
-            if (keys.next()) {
-                return keys.getInt(1);
+            try (ResultSet keys = dbManager.getConnection().createStatement()
+                    .executeQuery("SELECT last_insert_rowid()")) {
+                if (keys.next()) {
+                    return keys.getInt(1);
+                }
             }
         } catch (SQLException e) {
             System.err.println("Error creating student: " + e.getMessage());

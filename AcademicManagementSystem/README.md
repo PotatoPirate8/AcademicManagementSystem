@@ -59,9 +59,9 @@ AcademicManagementSystem/
 
 The application follows the **Model-View-Controller** pattern:
 
-- **Model** — Plain Java objects representing database entities (`User`, `Student`, `Course`, etc.)
-- **View** — JavaFX UI classes that build the interface and delegate all actions to controllers
-- **Controller** — Business logic, validation, and DAO coordination. Views never access the database directly.
+- **Model**: Plain Java objects representing database entities (`User`, `Student`, `Course`, etc.)
+- **View**: JavaFX UI classes that build the interface and delegate all actions to controllers
+- **Controller**: Business logic, validation, and DAO coordination. Views never access the database directly.
 
 ```
 View (UI) → Controller (logic) → DAO (database) → Model (data)
@@ -71,7 +71,7 @@ View (UI) → Controller (logic) → DAO (database) → Model (data)
 
 - **Java 23** (JDK) installed and available on PATH
 
-Maven is **not** required — the included Maven Wrapper (`mvnw.cmd`) downloads it automatically.
+Maven is **not** required the included Maven Wrapper (`mvnw.cmd`) downloads it automatically.
 
 ## Building and Running
 
@@ -121,27 +121,42 @@ java -jar academic-management-system-1.0-SNAPSHOT.jar
 
 ## Default Login
 
-| Role    | Username | Password  |
-|---------|----------|-----------|
-| Admin   | admin    | admin123  |
+| Role    | Username | Password     |
+|---------|----------|--------------|
+| Admin   | admin    | admin123     |
+| Student | jdoe     | password123  |
+| Student | asmith   | password123  |
+| Student | bwilson  | password123  |
+| Student | clee     | password123  |
+| Student | dpatel   | password123  |
 
-New students can register through the login screen.
+New students can also register through the login screen.
+
+## Sample Data
+
+The database is seeded with dummy data on first run:
+
+- **4 Lecturers** — James Smith, Sarah Johnson, Michael Brown, Emily Davis
+- **5 Students** — John Doe, Alice Smith, Ben Wilson, Clara Lee, Dev Patel
+- **5 Courses** — COMP1322, COMP1206, COMP1216, MATH1060, ELEC1201
+- **12 Enrollments** — mix of Enrolled, Completed, and Withdrawn statuses
+- **5 Grades** — with feedback and letter grades
 
 ## Features
 
 ### Student Dashboard
-- **My Courses** — View enrolled courses, withdraw from courses
-- **Available Courses** — Browse all courses, enroll (with capacity checks)
-- **My Grades** — View grades, feedback, and letter grades
-- **My Profile** — Update personal details (name, email, programme)
+- **My Courses**: View enrolled courses, withdraw from courses
+- **Available Courses**: Browse all courses, enroll (with capacity checks)
+- **My Grades**: View grades, feedback, and letter grades
+- **My Profile**: Update personal details (name, email, programme)
 
 ### Admin Dashboard
-- **Students** — View, update, and delete student records
-- **Lecturers** — Full CRUD (add, update, delete)
-- **Courses** — Full CRUD with lecturer assignment and capacity settings
-- **Enrollments** — Create enrollments, update status (Enrolled/Withdrawn/Completed)
-- **Grades** — Assign and update grades (0–100) with automatic letter grade calculation
-- **Reports** — Five report types with filters:
+- **Students**: View, update, and delete student records
+- **Lecturers**: Full CRUD (add, update, delete)
+- **Courses**: Full CRUD with lecturer assignment and capacity settings
+- **Enrollments**: Create enrollments, update status (Enrolled/Withdrawn/Completed)
+- **Grades**: Assign and update grades (0–100) with automatic letter grade calculation
+- **Reports**: Five report types with filters:
   - Average Grade by Course
   - Grade Distribution by Course
   - Enrollment Statistics

@@ -22,17 +22,18 @@ public class CourseDao {
     public int create(Course course) {
         String sql = "INSERT INTO courses (course_code, course_name, credits, lecturer_id, max_capacity) " +
                      "VALUES (?, ?, ?, ?, ?)";
-        try (PreparedStatement stmt = dbManager.getConnection().prepareStatement(sql,
-                Statement.RETURN_GENERATED_KEYS)) {
+        try (PreparedStatement stmt = dbManager.getConnection().prepareStatement(sql)) {
             stmt.setString(1, course.getCourseCode());
             stmt.setString(2, course.getCourseName());
             stmt.setInt(3, course.getCredits());
             stmt.setInt(4, course.getLecturerId());
             stmt.setInt(5, course.getMaxCapacity());
             stmt.executeUpdate();
-            ResultSet keys = stmt.getGeneratedKeys();
-            if (keys.next()) {
-                return keys.getInt(1);
+            try (ResultSet keys = dbManager.getConnection().createStatement()
+                    .executeQuery("SELECT last_insert_rowid()")) {
+                if (keys.next()) {
+                    return keys.getInt(1);
+                }
             }
         } catch (SQLException e) {
             System.err.println("Error creating course: " + e.getMessage());

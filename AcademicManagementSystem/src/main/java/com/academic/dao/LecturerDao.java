@@ -20,16 +20,17 @@ public class LecturerDao {
     /** Creates a new lecturer and returns the generated ID */
     public int create(Lecturer lecturer) {
         String sql = "INSERT INTO lecturers (first_name, last_name, email, department) VALUES (?, ?, ?, ?)";
-        try (PreparedStatement stmt = dbManager.getConnection().prepareStatement(sql,
-                Statement.RETURN_GENERATED_KEYS)) {
+        try (PreparedStatement stmt = dbManager.getConnection().prepareStatement(sql)) {
             stmt.setString(1, lecturer.getFirstName());
             stmt.setString(2, lecturer.getLastName());
             stmt.setString(3, lecturer.getEmail());
             stmt.setString(4, lecturer.getDepartment());
             stmt.executeUpdate();
-            ResultSet keys = stmt.getGeneratedKeys();
-            if (keys.next()) {
-                return keys.getInt(1);
+            try (ResultSet keys = dbManager.getConnection().createStatement()
+                    .executeQuery("SELECT last_insert_rowid()")) {
+                if (keys.next()) {
+                    return keys.getInt(1);
+                }
             }
         } catch (SQLException e) {
             System.err.println("Error creating lecturer: " + e.getMessage());

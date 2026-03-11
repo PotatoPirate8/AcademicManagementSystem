@@ -22,16 +22,17 @@ public class EnrollmentDao {
     /** Creates a new enrollment and returns the generated ID */
     public int create(Enrollment enrollment) {
         String sql = "INSERT INTO enrollments (student_id, course_id, enrollment_date, status) VALUES (?, ?, ?, ?)";
-        try (PreparedStatement stmt = dbManager.getConnection().prepareStatement(sql,
-                Statement.RETURN_GENERATED_KEYS)) {
+        try (PreparedStatement stmt = dbManager.getConnection().prepareStatement(sql)) {
             stmt.setInt(1, enrollment.getStudentId());
             stmt.setInt(2, enrollment.getCourseId());
             stmt.setString(3, enrollment.getEnrollmentDate().toString());
             stmt.setString(4, enrollment.getStatus().name());
             stmt.executeUpdate();
-            ResultSet keys = stmt.getGeneratedKeys();
-            if (keys.next()) {
-                return keys.getInt(1);
+            try (ResultSet keys = dbManager.getConnection().createStatement()
+                    .executeQuery("SELECT last_insert_rowid()")) {
+                if (keys.next()) {
+                    return keys.getInt(1);
+                }
             }
         } catch (SQLException e) {
             System.err.println("Error creating enrollment: " + e.getMessage());
