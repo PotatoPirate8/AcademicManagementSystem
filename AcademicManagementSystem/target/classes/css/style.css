@@ -1,0 +1,182 @@
+/* ============================================
+   Academic Management System - Main Stylesheet
+   Consistent styling across all views.
+   ============================================ */
+
+/* General root styles */
+.root {
+    -fx-font-family: "Segoe UI", Arial, sans-serif;
+    -fx-font-size: 13px;
+    -fx-base: #f5f5f5;
+}
+
+/* ==================== Login View ==================== */
+
+.login-box {
+    -fx-background-color: white;
+    -fx-border-color: #e0e0e0;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 2);
+}
+
+/* ==================== Typography ==================== */
+
+.title-text {
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+    -fx-fill: #2c3e50;
+}
+
+.subtitle-text {
+    -fx-font-size: 14px;
+    -fx-fill: #7f8c8d;
+}
+
+.section-title {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-fill: #2c3e50;
+}
+
+/* ==================== Navigation Bar ==================== */
+
+.top-bar {
+    -fx-background-color: #2c3e50;
+    -fx-padding: 12 20 12 20;
+}
+
+.welcome-label {
+    -fx-text-fill: white;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+}
+
+/* ==================== Buttons ==================== */
+
+.primary-button {
+    -fx-background-color: #3498db;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-padding: 8 20 8 20;
+    -fx-cursor: hand;
+    -fx-background-radius: 4;
+}
+
+.primary-button:hover {
+    -fx-background-color: #2980b9;
+}
+
+.success-button {
+    -fx-background-color: #27ae60;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-padding: 8 20 8 20;
+    -fx-cursor: hand;
+    -fx-background-radius: 4;
+}
+
+.success-button:hover {
+    -fx-background-color: #219a52;
+}
+
+.danger-button {
+    -fx-background-color: #e74c3c;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-padding: 8 20 8 20;
+    -fx-cursor: hand;
+    -fx-background-radius: 4;
+}
+
+.danger-button:hover {
+    -fx-background-color: #c0392b;
+}
+
+/* ==================== Form Elements ==================== */
+
+.text-field, .password-field {
+    -fx-padding: 8;
+    -fx-border-color: #bdc3c7;
+    -fx-border-radius: 4;
+    -fx-background-radius: 4;
+}
+
+.text-field:focused, .password-field:focused {
+    -fx-border-color: #3498db;
+}
+
+.text-area {
+    -fx-border-color: #bdc3c7;
+    -fx-border-radius: 4;
+}
+
+.combo-box {
+    -fx-border-color: #bdc3c7;
+    -fx-border-radius: 4;
+    -fx-background-radius: 4;
+}
+
+/* ==================== Labels ==================== */
+
+.label {
+    -fx-text-fill: #2c3e50;
+}
+
+.error-label {
+    -fx-text-fill: #e74c3c;
+    -fx-font-size: 12px;
+}
+
+/* ==================== Table Views ==================== */
+
+.table-view {
+    -fx-border-color: #e0e0e0;
+    -fx-border-radius: 4;
+}
+
+.table-view .column-header {
+    -fx-background-color: #ecf0f1;
+    -fx-font-weight: bold;
+}
+
+.table-view .table-row-cell:selected {
+    -fx-background-color: #3498db;
+    -fx-text-fill: white;
+}
+
+/* ==================== Tab Pane ==================== */
+
+.tab-pane > .tab-header-area > .tab-header-background {
+    -fx-background-color: #ecf0f1;
+}
+
+.tab-pane .tab {
+    -fx-background-color: #bdc3c7;
+    -fx-padding: 8 16 8 16;
+}
+
+.tab-pane .tab:selected {
+    -fx-background-color: #3498db;
+}
+
+.tab-pane .tab:selected .tab-label {
+    -fx-text-fill: white;
+}
+
+/* ==================== Report Output ==================== */
+
+.report-output {
+    -fx-font-family: "Consolas", "Courier New", monospace;
+    -fx-font-size: 12px;
+}
+
+/* ==================== Links ==================== */
+
+.hyperlink {
+    -fx-text-fill: #3498db;
+}
+
+.hyperlink:hover {
+    -fx-text-fill: #2980b9;
+}
