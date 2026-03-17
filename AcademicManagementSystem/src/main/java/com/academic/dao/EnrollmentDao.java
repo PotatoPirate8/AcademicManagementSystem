@@ -58,6 +58,27 @@ public class EnrollmentDao {
         return enrollments;
     }
 
+    /** Finds all enrollments for a specific course, with student details */
+    public List<Enrollment> findByCourseId(int courseId) {
+        List<Enrollment> enrollments = new ArrayList<>();
+        String sql = "SELECT e.*, c.course_code, c.course_name, " +
+                     "s.first_name || ' ' || s.last_name AS student_name " +
+                     "FROM enrollments e " +
+                     "JOIN courses c ON e.course_id = c.id " +
+                     "JOIN students s ON e.student_id = s.id " +
+                     "WHERE e.course_id = ? ORDER BY e.enrollment_date DESC";
+        try (PreparedStatement stmt = dbManager.getConnection().prepareStatement(sql)) {
+            stmt.setInt(1, courseId);
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                enrollments.add(mapRow(rs));
+            }
+        } catch (SQLException e) {
+            System.err.println("Error finding enrollments by course: " + e.getMessage());
+        }
+        return enrollments;
+    }
+
     /** Finds all enrollments with student and course details */
     public List<Enrollment> findAll() {
         List<Enrollment> enrollments = new ArrayList<>();

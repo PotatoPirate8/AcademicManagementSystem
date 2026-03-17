@@ -292,6 +292,14 @@ public class AdminController {
         return enrollmentDao.findAll();
     }
 
+    public List<Enrollment> getEnrollmentsByStudent(int studentId) {
+        return enrollmentDao.findByStudentId(studentId);
+    }
+
+    public List<Enrollment> getEnrollmentsByCourse(int courseId) {
+        return enrollmentDao.findByCourseId(courseId);
+    }
+
     public OperationResult addEnrollment(Student student, Course course) {
         if (student == null || course == null) {
             return OperationResult.failure("Please select both a student and a course.");

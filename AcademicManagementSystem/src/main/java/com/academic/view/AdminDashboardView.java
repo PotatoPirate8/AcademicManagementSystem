@@ -18,6 +18,7 @@ import javafx.stage.Stage;
 
 import java.time.LocalDate;
 import java.util.List;
+import javafx.util.StringConverter;
 
 /**
  * Admin dashboard view with tabs for:
@@ -566,13 +567,135 @@ public class AdminDashboardView {
         form.setVgap(8);
         form.setPadding(new Insets(10));
 
-        ComboBox<Student> studentCombo = new ComboBox<>();
-        studentCombo.setPromptText("Select Student");
-        studentCombo.setItems(FXCollections.observableArrayList(controller.getAllStudents()));
+        // Flag to prevent recursive updates between the two combos
+        boolean[] updating = {false};
 
+        List<Student> allStudents = controller.getAllStudents();
+        List<Course> allCourses = controller.getAllCourses();
+
+        // Mutable lists tracking the currently visible options in each combo
+        List<Student> availableStudents = new java.util.ArrayList<>(allStudents);
+        List<Course> availableCourses = new java.util.ArrayList<>(allCourses);
+
+        // Searchable student combo
+        ComboBox<Student> studentCombo = new ComboBox<>();
+        studentCombo.setPromptText("Type to search students...");
+        studentCombo.setEditable(true);
+        studentCombo.setItems(FXCollections.observableArrayList(allStudents));
+        studentCombo.setConverter(new StringConverter<>() {
+            @Override
+            public String toString(Student s) { return s == null ? "" : s.toString(); }
+            @Override
+            public Student fromString(String text) {
+                if (text == null || text.isEmpty()) return null;
+                String lower = text.toLowerCase();
+                return availableStudents.stream()
+                    .filter(s -> s.toString().toLowerCase().equals(lower)
+                              || s.getFullName().toLowerCase().equals(lower)
+                              || s.getStudentNumber().toLowerCase().equals(lower))
+                    .findFirst().orElse(studentCombo.getSelectionModel().getSelectedItem());
+            }
+        });
+        studentCombo.getEditor().textProperty().addListener((obs, oldVal, newVal) -> {
+            Student selected = studentCombo.getSelectionModel().getSelectedItem();
+            if (selected != null && selected.toString().equals(newVal)) return;
+            if (newVal == null || newVal.isEmpty()) {
+                studentCombo.setItems(FXCollections.observableArrayList(availableStudents));
+            } else {
+                String filter = newVal.toLowerCase();
+                List<Student> filtered = availableStudents.stream()
+                    .filter(s -> s.getFullName().toLowerCase().contains(filter)
+                              || s.getStudentNumber().toLowerCase().contains(filter))
+                    .toList();
+                studentCombo.setItems(FXCollections.observableArrayList(filtered));
+            }
+            if (!studentCombo.isShowing()) {
+                studentCombo.show();
+            }
+        });
+
+        // Searchable course combo
         ComboBox<Course> courseCombo = new ComboBox<>();
-        courseCombo.setPromptText("Select Course");
-        courseCombo.setItems(FXCollections.observableArrayList(controller.getAllCourses()));
+        courseCombo.setPromptText("Type to search courses...");
+        courseCombo.setEditable(true);
+        courseCombo.setItems(FXCollections.observableArrayList(allCourses));
+        courseCombo.setConverter(new StringConverter<>() {
+            @Override
+            public String toString(Course c) { return c == null ? "" : c.toString(); }
+            @Override
+            public Course fromString(String text) {
+                if (text == null || text.isEmpty()) return null;
+                String lower = text.toLowerCase();
+                return availableCourses.stream()
+                    .filter(c -> c.toString().toLowerCase().equals(lower)
+                              || c.getCourseName().toLowerCase().equals(lower)
+                              || c.getCourseCode().toLowerCase().equals(lower))
+                    .findFirst().orElse(courseCombo.getSelectionModel().getSelectedItem());
+            }
+        });
+        courseCombo.getEditor().textProperty().addListener((obs, oldVal, newVal) -> {
+            Course selected = courseCombo.getSelectionModel().getSelectedItem();
+            if (selected != null && selected.toString().equals(newVal)) return;
+            if (newVal == null || newVal.isEmpty()) {
+                courseCombo.setItems(FXCollections.observableArrayList(availableCourses));
+            } else {
+                String filter = newVal.toLowerCase();
+                List<Course> filtered = availableCourses.stream()
+                    .filter(c -> c.getCourseName().toLowerCase().contains(filter)
+                              || c.getCourseCode().toLowerCase().contains(filter))
+                    .toList();
+                courseCombo.setItems(FXCollections.observableArrayList(filtered));
+            }
+            if (!courseCombo.isShowing()) {
+                courseCombo.show();
+            }
+        });
+
+        // When a student is selected, filter courses to that student's enrolled courses
+        studentCombo.getSelectionModel().selectedItemProperty().addListener((obs, oldStudent, newStudent) -> {
+            if (updating[0]) return;
+            updating[0] = true;
+            courseCombo.getSelectionModel().clearSelection();
+            courseCombo.getEditor().clear();
+            availableCourses.clear();
+            if (newStudent != null) {
+                List<Enrollment> studentEnrollments = controller.getEnrollmentsByStudent(newStudent.getId());
+                java.util.Set<Integer> enrolledCourseIds = studentEnrollments.stream()
+                    .map(Enrollment::getCourseId)
+                    .collect(java.util.stream.Collectors.toSet());
+                availableCourses.addAll(allCourses.stream()
+                    .filter(c -> enrolledCourseIds.contains(c.getId()))
+                    .toList());
+                courseCombo.setItems(FXCollections.observableArrayList(availableCourses));
+            } else {
+                availableCourses.addAll(allCourses);
+                courseCombo.setItems(FXCollections.observableArrayList(availableCourses));
+            }
+            updating[0] = false;
+        });
+
+        // When a course is selected, filter students to those enrolled in that course
+        courseCombo.getSelectionModel().selectedItemProperty().addListener((obs, oldCourse, newCourse) -> {
+            if (updating[0]) return;
+            updating[0] = true;
+            studentCombo.getSelectionModel().clearSelection();
+            studentCombo.getEditor().clear();
+            availableStudents.clear();
+            if (newCourse != null) {
+                List<Enrollment> courseEnrollments = controller.getEnrollmentsByCourse(newCourse.getId());
+                java.util.Set<Integer> enrolledStudentIds = courseEnrollments.stream()
+                    .map(Enrollment::getStudentId)
+                    .collect(java.util.stream.Collectors.toSet());
+                availableStudents.addAll(allStudents.stream()
+                    .filter(s -> enrolledStudentIds.contains(s.getId()))
+                    .toList());
+                studentCombo.setItems(FXCollections.observableArrayList(availableStudents));
+            } else {
+                availableStudents.addAll(allStudents);
+                studentCombo.setItems(FXCollections.observableArrayList(availableStudents));
+            }
+            updating[0] = false;
+        });
 
         ComboBox<Enrollment.Status> statusCombo = new ComboBox<>();
         statusCombo.setItems(FXCollections.observableArrayList(Enrollment.Status.values()));
@@ -588,6 +711,7 @@ public class AdminDashboardView {
         updateStatusBtn.getStyleClass().add("primary-button");
         Button deleteBtn = new Button("Delete");
         deleteBtn.getStyleClass().add("danger-button");
+        Button clearBtn = new Button("Clear");
 
         addBtn.setOnAction(e -> {
             Student student = studentCombo.getSelectionModel().getSelectedItem();
@@ -625,7 +749,24 @@ public class AdminDashboardView {
             }
         });
 
-        buttons.getChildren().addAll(addBtn, updateStatusBtn, deleteBtn);
+        clearBtn.setOnAction(e -> {
+            updating[0] = true;
+            studentCombo.getSelectionModel().clearSelection();
+            studentCombo.getEditor().clear();
+            courseCombo.getSelectionModel().clearSelection();
+            courseCombo.getEditor().clear();
+            availableStudents.clear();
+            availableStudents.addAll(allStudents);
+            availableCourses.clear();
+            availableCourses.addAll(allCourses);
+            studentCombo.setItems(FXCollections.observableArrayList(availableStudents));
+            courseCombo.setItems(FXCollections.observableArrayList(availableCourses));
+            enrollmentsTable.getSelectionModel().clearSelection();
+            statusCombo.setValue(Enrollment.Status.ENROLLED);
+            updating[0] = false;
+        });
+
+        buttons.getChildren().addAll(addBtn, updateStatusBtn, deleteBtn, clearBtn);
         refreshEnrollments();
 
         content.getChildren().addAll(enrollmentsTable, form, buttons);

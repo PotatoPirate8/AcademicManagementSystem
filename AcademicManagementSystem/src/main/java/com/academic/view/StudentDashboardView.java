@@ -117,13 +117,21 @@ public class StudentDashboardView {
 
         myCoursesTable.getColumns().addAll(codeCol, nameCol, dateCol, statusCol);
 
+        HBox buttonBar = new HBox(10);
+
         Button withdrawButton = new Button("Withdraw from Selected Course");
         withdrawButton.getStyleClass().add("danger-button");
         withdrawButton.setOnAction(e -> handleWithdraw());
 
+        Button deleteButton = new Button("Delete Selected Enrollment");
+        deleteButton.getStyleClass().add("danger-button");
+        deleteButton.setOnAction(e -> handleDeleteEnrollment());
+
+        buttonBar.getChildren().addAll(withdrawButton, deleteButton);
+
         refreshMyCourses();
 
-        content.getChildren().addAll(myCoursesTable, withdrawButton);
+        content.getChildren().addAll(myCoursesTable, buttonBar);
         VBox.setVgrow(myCoursesTable, Priority.ALWAYS);
         tab.setContent(content);
         return tab;
@@ -332,6 +340,26 @@ public class StudentDashboardView {
                 refreshMyCourses();
             } else {
                 AlertUtil.showWarning("Cannot Withdraw", result.getMessage());
+            }
+        }
+    }
+
+    /** Handles deleting a withdrawn enrollment record */
+    private void handleDeleteEnrollment() {
+        Enrollment selected = myCoursesTable.getSelectionModel().getSelectedItem();
+        if (selected == null) {
+            AlertUtil.showWarning("No Selection", "Please select an enrollment to delete.");
+            return;
+        }
+
+        if (AlertUtil.showConfirmation("Confirm Delete",
+                "Are you sure you want to delete this enrollment record for " + selected.getCourseCode() + "?")) {
+            OperationResult result = controller.deleteEnrollment(selected);
+            if (result.isSuccess()) {
+                AlertUtil.showInfo("Success", result.getMessage());
+                refreshMyCourses();
+            } else {
+                AlertUtil.showWarning("Cannot Delete", result.getMessage());
             }
         }
     }

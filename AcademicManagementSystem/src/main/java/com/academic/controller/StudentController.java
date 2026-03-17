@@ -125,6 +125,23 @@ public class StudentController {
     }
 
     /**
+     * Deletes a withdrawn enrollment from the student's history.
+     */
+    public OperationResult deleteEnrollment(Enrollment enrollment) {
+        if (enrollment == null) {
+            return OperationResult.failure("Please select an enrollment to delete.");
+        }
+        if (enrollment.getStatus() == Enrollment.Status.ENROLLED) {
+            return OperationResult.failure("You must withdraw from the course before deleting it.");
+        }
+
+        if (enrollmentDao.delete(enrollment.getId())) {
+            return OperationResult.success("Enrollment record deleted successfully.");
+        }
+        return OperationResult.failure("Failed to delete enrollment. Please try again.");
+    }
+
+    /**
      * Updates the student's profile information.
      */
     public OperationResult updateProfile(Student student, String firstName, String lastName,

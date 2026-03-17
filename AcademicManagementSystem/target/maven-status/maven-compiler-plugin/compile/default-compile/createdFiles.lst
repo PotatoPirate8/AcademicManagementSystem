@@ -9,6 +9,7 @@ com\academic\util\PasswordUtil.class
 com\academic\util\SessionManager.class
 com\academic\view\StudentDashboardView.class
 com\academic\controller\AdminController$OperationResult.class
+com\academic\view\AdminDashboardView$2.class
 com\academic\model\Lecturer.class
 com\academic\dao\CourseDao.class
 com\academic\util\ValidationUtil.class
@@ -28,4 +29,5 @@ com\academic\view\AdminDashboardView.class
 com\academic\controller\AdminController.class
 com\academic\Launcher.class
 com\academic\dao\LecturerDao.class
+com\academic\view\AdminDashboardView$1.class
 com\academic\model\Course.class
