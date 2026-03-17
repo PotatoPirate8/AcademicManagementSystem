@@ -12,14 +12,28 @@ import java.sql.Statement;
  */
 public class DatabaseManager {
 
-    // Change the path below to store the database wherever your Java source files are located
-    private static final String DB_URL = "jdbc:sqlite:academic_system.db";
+    private static final String DEFAULT_DB_URL = "jdbc:sqlite:academic_system.db";
+    private static final String DB_URL = resolveDatabaseUrl();
     private static DatabaseManager instance;
     private Connection connection;
+    private final boolean shouldSeedDummyData;
+
+    private static String resolveDatabaseUrl() {
+        String envUrl = System.getenv("ACADEMIC_DB_URL");
+        if (envUrl != null && !envUrl.isBlank()) {
+            return envUrl;
+        }
+        String propUrl = System.getProperty("academic.db.url");
+        if (propUrl != null && !propUrl.isBlank()) {
+            return propUrl;
+        }
+        return DEFAULT_DB_URL;
+    }
 
     /** Private constructor for default production database */
     private DatabaseManager() {
         try {
+            shouldSeedDummyData = true;
             connection = DriverManager.getConnection(DB_URL);
             initializeSchema();
         } catch (SQLException e) {
@@ -30,6 +44,7 @@ public class DatabaseManager {
     /** Private constructor with custom URL (used for testing) */
     private DatabaseManager(String url) {
         try {
+            shouldSeedDummyData = DB_URL.equals(url);
             connection = DriverManager.getConnection(url);
             initializeSchema();
         } catch (SQLException e) {
@@ -141,11 +156,13 @@ public class DatabaseManager {
                 VALUES ('admin', '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9', 'ADMIN')
             """);
 
-            // Seed dummy data if the database is fresh (no lecturers yet)
-            ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM lecturers");
-            rs.next();
-            if (rs.getInt(1) == 0) {
-                seedDummyData(stmt);
+            // Seed dummy data only for the default production database.
+            if (shouldSeedDummyData) {
+                ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM lecturers");
+                rs.next();
+                if (rs.getInt(1) == 0) {
+                    seedDummyData(stmt);
+                }
             }
         }
     }

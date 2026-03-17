@@ -11,8 +11,8 @@ A JavaFX desktop application for managing students, lecturers, courses, enrollme
 3. [Architecture](#architecture-mvc)
 4. [Database Schema](#database-schema)
 5. [Authentication & Security](#authentication--security)
-6. [Features — Student Dashboard](#features--student-dashboard)
-7. [Features — Admin Dashboard](#features--admin-dashboard)
+6. [Features: Student Dashboard](#features--student-dashboard)
+7. [Features: Admin Dashboard](#features--admin-dashboard)
 8. [Validation Rules](#validation-rules)
 9. [Grade Scale](#grade-scale)
 10. [Prerequisites](#prerequisites)
@@ -132,7 +132,7 @@ The application follows a strict **Model-View-Controller** pattern with an addit
 └──────────────────────────────────────────────────────────┘
 ```
 
-### Data Flow Example — Student Enrolment
+### Data Flow Example: Student Enrolment
 
 1. **StudentDashboardView**: User selects a course and clicks "Enroll"
 2. **StudentController.enroll()**: Validates the selection, checks `EnrollmentDao.isEnrolled()` for duplicates, checks `CourseDao.getEnrollmentCount()` against `course.getMaxCapacity()`
@@ -141,10 +141,10 @@ The application follows a strict **Model-View-Controller** pattern with an addit
 
 ### Key Design Principles
 
-- **Views never access DAOs directly** — all database operations go through Controllers
-- **Controllers return `OperationResult`** — a simple success/failure object with a user-facing message, keeping the View free of business logic
-- **All SQL uses `PreparedStatement`** — preventing SQL injection
-- **Singleton `DatabaseManager`** — ensures a single shared connection throughout the application lifecycle
+- **Views never access DAOs directly**: all database operations go through Controllers
+- **Controllers return `OperationResult`**: a simple success/failure object with a user-facing message, keeping the View free of business logic
+- **All SQL uses `PreparedStatement`**: preventing SQL injection
+- **Singleton `DatabaseManager`**: ensures a single shared connection throughout the application lifecycle
 
 ---
 
@@ -162,7 +162,7 @@ lecturers 1──* courses ─┘
 
 ### Table Definitions
 
-#### `users` — Authentication accounts
+#### `users`: Authentication accounts
 
 | Column         | Type    | Constraints                              |
 |----------------|---------|------------------------------------------|
@@ -171,7 +171,7 @@ lecturers 1──* courses ─┘
 | `password_hash`| TEXT    | NOT NULL (SHA-256 hash)                  |
 | `role`         | TEXT    | NOT NULL, CHECK(`STUDENT` or `ADMIN`)    |
 
-#### `students` — Student profiles
+#### `students`: Student profiles
 
 | Column           | Type    | Constraints                              |
 |------------------|---------|------------------------------------------|
@@ -183,7 +183,7 @@ lecturers 1──* courses ─┘
 | `student_number` | TEXT    | UNIQUE NOT NULL                          |
 | `programme`      | TEXT    | NOT NULL                                 |
 
-#### `lecturers` — Lecturer records
+#### `lecturers`: Lecturer records
 
 | Column       | Type    | Constraints                              |
 |--------------|---------|------------------------------------------|
@@ -193,7 +193,7 @@ lecturers 1──* courses ─┘
 | `email`      | TEXT    | UNIQUE NOT NULL                          |
 | `department` | TEXT    | NOT NULL                                 |
 
-#### `courses` — Course catalogue
+#### `courses`: Course catalogue
 
 | Column         | Type    | Constraints                              |
 |----------------|---------|------------------------------------------|
@@ -204,7 +204,7 @@ lecturers 1──* courses ─┘
 | `lecturer_id`  | INTEGER | FK → `lecturers.id`                      |
 | `max_capacity` | INTEGER | NOT NULL                                 |
 
-#### `enrollments` — Student-Course relationships
+#### `enrollments`: Student-Course relationships
 
 | Column            | Type    | Constraints                                           |
 |-------------------|---------|-------------------------------------------------------|
@@ -214,9 +214,9 @@ lecturers 1──* courses ─┘
 | `enrollment_date` | TEXT    | NOT NULL (ISO date string)                            |
 | `status`          | TEXT    | NOT NULL, CHECK(`ENROLLED`, `COMPLETED`, `WITHDRAWN`) |
 
-- **UNIQUE constraint** on (`student_id`, `course_id`) — a student can only have one enrollment per course.
+- **UNIQUE constraint** on (`student_id`, `course_id`): a student can only have one enrollment per course.
 
-#### `grades` — Assessment results
+#### `grades`: Assessment results
 
 | Column          | Type    | Constraints                              |
 |-----------------|---------|------------------------------------------|
@@ -227,7 +227,7 @@ lecturers 1──* courses ─┘
 | `feedback`      | TEXT    |                                          |
 | `graded_date`   | TEXT    | NOT NULL (ISO date string)               |
 
-- **UNIQUE constraint** on `enrollment_id` — each enrollment has at most one grade.
+- **UNIQUE constraint** on `enrollment_id`: each enrollment has at most one grade.
 
 ---
 
@@ -259,13 +259,13 @@ Plaintext passwords are **never stored** in the database.
 ### Session Management
 
 `SessionManager` is a static utility that holds:
-- `currentUser` — the authenticated `User` object
-- `currentStudent` — the `Student` profile (null for admin users)
-- `logout()` — clears both fields
+- `currentUser`: the authenticated `User` object
+- `currentStudent`: the `Student` profile (null for admin users)
+- `logout()`: clears both fields
 
 ---
 
-## Features — Student Dashboard
+## Features: Student Dashboard
 
 The student dashboard provides four tabs. Full **CRUD** operations are available for the student's own enrollment data:
 
@@ -295,17 +295,20 @@ The student dashboard provides four tabs. Full **CRUD** operations are available
 - Student number is displayed but is read-only
 - Input validation is enforced before saving
 
-### CRUD Summary for Student
+### CRUD Coverage for All Entities (System-wide)
 
-| Entity     | Create | Read | Update | Delete |
-|------------|--------|------|--------|--------|
-| Enrollment | ✅ Enroll in course | ✅ View my courses | ✅ Withdraw | ✅ Delete non-active |
-| Profile    | — | ✅ View profile | ✅ Edit profile | — |
-| Grade      | — | ✅ View my grades | — | — |
+| Entity     | Student Role | Admin Role |
+|------------|--------------|------------|
+| User Account | ❌ | Create / Read / Update password / Delete |
+| Student Profile | Read own / Update own | Create / Read / Update / Delete |
+| Lecturer | ❌ | Create / Read / Update / Delete |
+| Course | Read | Create / Read / Update / Delete |
+| Enrollment | Create / Read own / Update (withdraw) / Delete non-active own | Create / Read / Update / Delete |
+| Grade | Read own | Create / Read / Update / Delete |
 
 ---
 
-## Features — Admin Dashboard
+## Features: Admin Dashboard
 
 The admin dashboard provides six tabs with full CRUD operations on all entities:
 
@@ -405,7 +408,7 @@ Letter grades are automatically calculated by `Grade.calculateGradeLetter()`:
 
 - **Java 23** (JDK) installed and available on PATH
 
-Maven is **not** required — the included Maven Wrapper (`mvnw.cmd`) downloads it automatically.
+Maven is **not** required: the included Maven Wrapper (`mvnw.cmd`) downloads it automatically.
 
 ---
 
@@ -416,13 +419,13 @@ All commands should be run from the `AcademicManagementSystem/` directory.
 ### Set JAVA_HOME (if not already set)
 
 ```powershell
-$env:JAVA_HOME = "C:\Program Files\Java\jdk-23"
+$env:JAVA_HOME = "<path-to-your-jdk-23>"
 ```
 
 To set it permanently:
 
 ```powershell
-[Environment]::SetEnvironmentVariable("JAVA_HOME", "C:\Program Files\Java\jdk-23", "User")
+[Environment]::SetEnvironmentVariable("JAVA_HOME", "<path-to-your-jdk-23>", "User")
 ```
 
 ### Compile
@@ -497,7 +500,7 @@ The database is automatically populated with sample data when tables are empty:
 | Entity | Count | Details |
 |--------|-------|---------|
 | **Lecturers** | 4 | James Smith (Computer Science), Sarah Johnson (Computer Science), Michael Brown (Mathematics), Emily Davis (Electronics) |
-| **Students** | 5 | John Doe, Alice Smith, Ben Wilson, Clara Lee, Dev Patel — all in Computer Science programme |
+| **Students** | 5 | John Doe, Alice Smith, Ben Wilson, Clara Lee, Dev Patel: all in Computer Science programme |
 | **Courses** | 5 | COMP1322 (Databases, 15 credits, cap 50), COMP1206 (Programming, 15 credits, cap 60), COMP1216 (Software Modelling, 15 credits, cap 45), MATH1060 (Calculus, 15 credits, cap 100), ELEC1201 (Digital Systems, 15 credits, cap 40) |
 | **Enrollments** | 12 | Mix of `ENROLLED`, `COMPLETED`, and `WITHDRAWN` statuses across students and courses |
 | **Grades** | 5 | Assigned to completed enrollments with values ranging from 45 to 82, with feedback |
@@ -524,7 +527,7 @@ The admin enrollment form uses bidirectional combo-box filtering: selecting a st
 
 ### Singleton DatabaseManager
 
-A single `DatabaseManager` instance manages the SQLite connection throughout the application lifecycle. The schema is initialised with `CREATE TABLE IF NOT EXISTS`, making the application self-bootstrapping — no manual database setup is needed.
+A single `DatabaseManager` instance manages the SQLite connection throughout the application lifecycle. The schema is initialised with `CREATE TABLE IF NOT EXISTS`, making the application self-bootstrapping: no manual database setup is needed.
 
 ### CSS Theming
 
