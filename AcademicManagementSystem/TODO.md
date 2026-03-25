@@ -25,7 +25,7 @@ This backlog is prioritised by implementation importance and overall project imp
 | Done | Rank | Priority | Tags | Item | Why It Matters |
 |------|------|----------|------|------|----------------|
 | [x] | 1 | P1 | `ARCH`, `TEST` | Add a **Service Layer** (`StudentService`, `CourseService`, `EnrollmentService`) between controllers and DAOs | Centralises business rules, reduces controller complexity, and makes logic easier to test |
-| [ ] | 2 | P1 | `SEC`, `FEATURE` | Implement **Role-Based Access Control (RBAC)** for admin/student/lecturer actions | Prevents unauthorized actions and enforces correct role permissions |
+| [x] | 2 | P1 | `SEC`, `FEATURE` | Implement **Role-Based Access Control (RBAC)** for admin/student/lecturer actions | Prevents unauthorized actions and enforces correct role permissions |
 | [ ] | 3 | P1 | `DB`, `ARCH` | Improve database reliability: add **transactions**, introduce **schema migrations** (Flyway/Liquibase), and consider **connection pooling** | Prevents inconsistent data and supports safe schema evolution |
 | [ ] | 4 | P1 | `SEC` | Upgrade authentication security: move from SHA-256 to **BCrypt/Argon2**, add failed-login lockout/rate limiting | Improves password protection and hardens login against brute-force attacks |
 | [ ] | 5 | P2 | `TEST` | Expand automated tests: integration tests for DAOs, service tests, and edge-case workflow tests | Increases confidence and prevents regressions |
