@@ -1,7 +1,0 @@
-com\academic\util\ValidationUtilTest.class
-com\academic\dao\CourseDaoTest.class
-com\academic\dao\GradeDaoTest.class
-com\academic\dao\StudentDaoTest.class
-com\academic\dao\UserDaoTest.class
-com\academic\util\PasswordUtilTest.class
-com\academic\model\ModelTest.class

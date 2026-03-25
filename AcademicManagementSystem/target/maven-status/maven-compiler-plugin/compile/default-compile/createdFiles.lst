@@ -8,11 +8,9 @@ com\academic\dao\StudentDao.class
 com\academic\util\PasswordUtil.class
 com\academic\util\SessionManager.class
 com\academic\view\StudentDashboardView.class
-com\academic\controller\AdminController$OperationResult.class
-com\academic\view\AdminDashboardView$2.class
 com\academic\model\Lecturer.class
 com\academic\dao\CourseDao.class
-com\academic\util\ValidationUtil.class
+com\academic\service\ServiceResult.class
 com\academic\dao\EnrollmentDao.class
 com\academic\util\AlertUtil.class
 com\academic\model\Enrollment$Status.class
@@ -25,9 +23,4 @@ com\academic\model\User$Role.class
 com\academic\App.class
 com\academic\view\LoginView.class
 com\academic\model\Grade.class
-com\academic\view\AdminDashboardView.class
-com\academic\controller\AdminController.class
-com\academic\Launcher.class
-com\academic\dao\LecturerDao.class
-com\academic\view\AdminDashboardView$1.class
 com\academic\model\Course.class

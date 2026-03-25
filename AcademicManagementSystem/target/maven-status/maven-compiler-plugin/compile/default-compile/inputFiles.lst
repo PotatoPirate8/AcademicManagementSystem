@@ -16,6 +16,10 @@ C:\Users\junha\OneDrive - University of Southampton\CS Part 1\COMP1322\Coursewor
 C:\Users\junha\OneDrive - University of Southampton\CS Part 1\COMP1322\Coursework\AcademicManagementSystem\src\main\java\com\academic\model\Lecturer.java
 C:\Users\junha\OneDrive - University of Southampton\CS Part 1\COMP1322\Coursework\AcademicManagementSystem\src\main\java\com\academic\model\Student.java
 C:\Users\junha\OneDrive - University of Southampton\CS Part 1\COMP1322\Coursework\AcademicManagementSystem\src\main\java\com\academic\model\User.java
+C:\Users\junha\OneDrive - University of Southampton\CS Part 1\COMP1322\Coursework\AcademicManagementSystem\src\main\java\com\academic\service\CourseService.java
+C:\Users\junha\OneDrive - University of Southampton\CS Part 1\COMP1322\Coursework\AcademicManagementSystem\src\main\java\com\academic\service\EnrollmentService.java
+C:\Users\junha\OneDrive - University of Southampton\CS Part 1\COMP1322\Coursework\AcademicManagementSystem\src\main\java\com\academic\service\ServiceResult.java
+C:\Users\junha\OneDrive - University of Southampton\CS Part 1\COMP1322\Coursework\AcademicManagementSystem\src\main\java\com\academic\service\StudentService.java
 C:\Users\junha\OneDrive - University of Southampton\CS Part 1\COMP1322\Coursework\AcademicManagementSystem\src\main\java\com\academic\util\AlertUtil.java
 C:\Users\junha\OneDrive - University of Southampton\CS Part 1\COMP1322\Coursework\AcademicManagementSystem\src\main\java\com\academic\util\PasswordUtil.java
 C:\Users\junha\OneDrive - University of Southampton\CS Part 1\COMP1322\Coursework\AcademicManagementSystem\src\main\java\com\academic\util\SessionManager.java

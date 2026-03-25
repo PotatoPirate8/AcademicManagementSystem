@@ -113,9 +113,16 @@ public class LoginView {
         // Route to the correct dashboard based on role
         if (result.getUser().getRole() == User.Role.STUDENT) {
             showStudentDashboard();
-        } else {
-            showAdminDashboard();
+            return;
         }
+        if (result.getUser().getRole() == User.Role.ADMIN) {
+            showAdminDashboard();
+            return;
+        }
+
+        // LECTURER role exists for RBAC, but lecturer dashboard is not implemented yet.
+        SessionManager.logout();
+        errorLabel.setText("Lecturer dashboard is not available yet.");
     }
 
     /** Shows the student registration form */

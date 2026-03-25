@@ -80,7 +80,7 @@ public class DatabaseManager {
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     username TEXT UNIQUE NOT NULL,
                     password_hash TEXT NOT NULL,
-                    role TEXT NOT NULL CHECK(role IN ('STUDENT', 'ADMIN'))
+                    role TEXT NOT NULL CHECK(role IN ('STUDENT', 'ADMIN', 'LECTURER'))
                 )
             """);
 

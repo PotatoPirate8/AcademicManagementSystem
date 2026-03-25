@@ -2,6 +2,10 @@ package com.academic.controller;
 
 import com.academic.dao.*;
 import com.academic.model.*;
+import com.academic.service.CourseService;
+import com.academic.service.EnrollmentService;
+import com.academic.service.ServiceResult;
+import com.academic.service.StudentService;
 import com.academic.util.PasswordUtil;
 import com.academic.util.SessionManager;
 import com.academic.util.ValidationUtil;
@@ -18,19 +22,19 @@ import java.util.Map;
 public class AdminController {
 
     private final UserDao userDao;
-    private final StudentDao studentDao;
     private final LecturerDao lecturerDao;
-    private final CourseDao courseDao;
-    private final EnrollmentDao enrollmentDao;
     private final GradeDao gradeDao;
+    private final StudentService studentService;
+    private final CourseService courseService;
+    private final EnrollmentService enrollmentService;
 
     public AdminController() {
         this.userDao = new UserDao();
-        this.studentDao = new StudentDao();
         this.lecturerDao = new LecturerDao();
-        this.courseDao = new CourseDao();
-        this.enrollmentDao = new EnrollmentDao();
         this.gradeDao = new GradeDao();
+        this.studentService = new StudentService();
+        this.courseService = new CourseService();
+        this.enrollmentService = new EnrollmentService();
     }
 
     /**
@@ -60,99 +64,59 @@ public class AdminController {
     // ==================== Student CRUD ====================
 
     public List<Student> getAllStudents() {
-        return studentDao.findAll();
+        if (!SessionManager.isAdmin()) {
+            return List.of();
+        }
+        return studentService.getAllStudents();
     }
 
     public OperationResult updateStudent(Student student, String firstName, String lastName,
                                          String email, String studentNumber, String programme) {
-        if (student == null) {
-            return OperationResult.failure("Please select a student to update.");
+        OperationResult auth = requireAdmin();
+        if (auth != null) {
+            return auth;
         }
-        // Validate fields
-        if (ValidationUtil.isNullOrEmpty(firstName) || ValidationUtil.isNullOrEmpty(lastName)) {
-            return OperationResult.failure("Name fields cannot be empty.");
-        }
-        if (!ValidationUtil.isValidEmail(email)) {
-            return OperationResult.failure("Please enter a valid email address.");
-        }
-        if (!ValidationUtil.isValidStudentNumber(studentNumber)) {
-            return OperationResult.failure("Student number must be 4-12 alphanumeric characters.");
-        }
-        if (ValidationUtil.isNullOrEmpty(programme)) {
-            return OperationResult.failure("Programme cannot be empty.");
-        }
-
-        student.setFirstName(firstName.trim());
-        student.setLastName(lastName.trim());
-        student.setEmail(email.trim());
-        student.setStudentNumber(studentNumber.trim().toUpperCase());
-        student.setProgramme(programme.trim());
-
-        if (studentDao.update(student)) {
-            return OperationResult.success("Student updated successfully.");
-        }
-        return OperationResult.failure("Failed to update student.");
+        ServiceResult<Void> result = studentService.updateStudent(
+            student, firstName, lastName, email, studentNumber, programme
+        );
+        return toOperationResult(result);
     }
 
     public OperationResult addStudent(String username, String password, String firstName,
                                        String lastName, String email, String studentNumber, String programme) {
-        if (!ValidationUtil.isValidUsername(username)) {
-            return OperationResult.failure("Username must be 3-20 alphanumeric characters.");
+        OperationResult auth = requireAdmin();
+        if (auth != null) {
+            return auth;
         }
-        if (!ValidationUtil.isValidPassword(password)) {
-            return OperationResult.failure("Password must be at least 6 characters.");
-        }
-        if (ValidationUtil.isNullOrEmpty(firstName) || ValidationUtil.isNullOrEmpty(lastName)) {
-            return OperationResult.failure("Name fields cannot be empty.");
-        }
-        if (!ValidationUtil.isValidEmail(email)) {
-            return OperationResult.failure("Please enter a valid email address.");
-        }
-        if (!ValidationUtil.isValidStudentNumber(studentNumber)) {
-            return OperationResult.failure("Student number must be 4-12 alphanumeric characters.");
-        }
-        if (ValidationUtil.isNullOrEmpty(programme)) {
-            return OperationResult.failure("Programme cannot be empty.");
-        }
-        if (userDao.findByUsername(username) != null) {
-            return OperationResult.failure("Username already taken.");
-        }
-
-        String hash = PasswordUtil.hashPassword(password);
-        User user = new User(username, hash, User.Role.STUDENT);
-        int userId = userDao.create(user);
-        if (userId == -1) {
-            return OperationResult.failure("Failed to create user account.");
-        }
-
-        Student student = new Student(
-            userId, firstName.trim(), lastName.trim(),
-            email.trim(), studentNumber.trim().toUpperCase(), programme.trim()
+        ServiceResult<Integer> result = studentService.registerStudentAccount(
+            username, password, firstName, lastName, email, studentNumber, programme
         );
-        int studentId = studentDao.create(student);
-        if (studentId == -1) {
-            userDao.delete(userId);
-            return OperationResult.failure("Failed to create student. Student number may already exist.");
-        }
-        return OperationResult.success("Student added successfully.");
+        return toOperationResult(result);
     }
 
     public OperationResult deleteStudent(Student student) {
-        if (student == null) {
-            return OperationResult.failure("Please select a student to delete.");
+        OperationResult auth = requireAdmin();
+        if (auth != null) {
+            return auth;
         }
-        studentDao.delete(student.getId());
-        userDao.delete(student.getUserId());
-        return OperationResult.success("Student deleted successfully.");
+        ServiceResult<Void> result = studentService.deleteStudent(student);
+        return toOperationResult(result);
     }
 
     // ==================== Lecturer CRUD ====================
 
     public List<Lecturer> getAllLecturers() {
+        if (!SessionManager.isAdmin()) {
+            return List.of();
+        }
         return lecturerDao.findAll();
     }
 
     public OperationResult addLecturer(String firstName, String lastName, String email, String department) {
+        OperationResult auth = requireAdmin();
+        if (auth != null) {
+            return auth;
+        }
         String validationError = validateLecturerFields(firstName, lastName, email, department);
         if (validationError != null) {
             return OperationResult.failure(validationError);
@@ -169,6 +133,10 @@ public class AdminController {
 
     public OperationResult updateLecturer(Lecturer lecturer, String firstName, String lastName,
                                           String email, String department) {
+        OperationResult auth = requireAdmin();
+        if (auth != null) {
+            return auth;
+        }
         if (lecturer == null) {
             return OperationResult.failure("Please select a lecturer to update.");
         }
@@ -189,6 +157,10 @@ public class AdminController {
     }
 
     public OperationResult deleteLecturer(Lecturer lecturer) {
+        OperationResult auth = requireAdmin();
+        if (auth != null) {
+            return auth;
+        }
         if (lecturer == null) {
             return OperationResult.failure("Please select a lecturer to delete.");
         }
@@ -212,140 +184,107 @@ public class AdminController {
     // ==================== Course CRUD ====================
 
     public List<Course> getAllCourses() {
-        return courseDao.findAll();
+        if (!SessionManager.isAdmin()) {
+            return List.of();
+        }
+        return courseService.getAllCourses();
     }
 
     public OperationResult addCourse(String code, String name, String creditsStr,
                                      String capacityStr, Lecturer lecturer) {
-        String validationError = validateCourseFields(code, name, creditsStr, capacityStr, lecturer);
-        if (validationError != null) {
-            return OperationResult.failure(validationError);
+        OperationResult auth = requireAdmin();
+        if (auth != null) {
+            return auth;
         }
-
-        Course course = new Course(
-            code.trim().toUpperCase(), name.trim(),
-            ValidationUtil.parseIntSafe(creditsStr),
-            lecturer.getId(),
-            ValidationUtil.parseIntSafe(capacityStr)
-        );
-        if (courseDao.create(course) > 0) {
-            return OperationResult.success("Course added successfully.");
-        }
-        return OperationResult.failure("Failed to add course. Code may already exist.");
+        ServiceResult<Void> result = courseService.addCourse(code, name, creditsStr, capacityStr, lecturer);
+        return toOperationResult(result);
     }
 
     public OperationResult updateCourse(Course course, String code, String name,
                                         String creditsStr, String capacityStr, Lecturer lecturer) {
-        if (course == null) {
-            return OperationResult.failure("Please select a course to update.");
+        OperationResult auth = requireAdmin();
+        if (auth != null) {
+            return auth;
         }
-        String validationError = validateCourseFields(code, name, creditsStr, capacityStr, lecturer);
-        if (validationError != null) {
-            return OperationResult.failure(validationError);
-        }
-
-        course.setCourseCode(code.trim().toUpperCase());
-        course.setCourseName(name.trim());
-        course.setCredits(ValidationUtil.parseIntSafe(creditsStr));
-        course.setMaxCapacity(ValidationUtil.parseIntSafe(capacityStr));
-        course.setLecturerId(lecturer.getId());
-
-        if (courseDao.update(course)) {
-            return OperationResult.success("Course updated successfully.");
-        }
-        return OperationResult.failure("Failed to update course.");
+        ServiceResult<Void> result = courseService.updateCourse(
+            course, code, name, creditsStr, capacityStr, lecturer
+        );
+        return toOperationResult(result);
     }
 
     public OperationResult deleteCourse(Course course) {
-        if (course == null) {
-            return OperationResult.failure("Please select a course to delete.");
+        OperationResult auth = requireAdmin();
+        if (auth != null) {
+            return auth;
         }
-        courseDao.delete(course.getId());
-        return OperationResult.success("Course deleted successfully.");
-    }
-
-    private String validateCourseFields(String code, String name, String creditsStr,
-                                        String capacityStr, Lecturer lecturer) {
-        if (!ValidationUtil.isValidCourseCode(code.trim().toUpperCase())) {
-            return "Course code must be 2-5 letters followed by 3-5 digits (e.g., COMP1322).";
-        }
-        if (ValidationUtil.isNullOrEmpty(name)) {
-            return "Course name cannot be empty.";
-        }
-        int credits = ValidationUtil.parseIntSafe(creditsStr);
-        if (!ValidationUtil.isPositiveInteger(credits)) {
-            return "Credits must be a positive number.";
-        }
-        int capacity = ValidationUtil.parseIntSafe(capacityStr);
-        if (!ValidationUtil.isPositiveInteger(capacity)) {
-            return "Capacity must be a positive number.";
-        }
-        if (lecturer == null) {
-            return "Please select a lecturer.";
-        }
-        return null;
+        ServiceResult<Void> result = courseService.deleteCourse(course);
+        return toOperationResult(result);
     }
 
     // ==================== Enrollment CRUD ====================
 
     public List<Enrollment> getAllEnrollments() {
-        return enrollmentDao.findAll();
+        if (!SessionManager.isAdmin()) {
+            return List.of();
+        }
+        return enrollmentService.getAllEnrollments();
     }
 
     public List<Enrollment> getEnrollmentsByStudent(int studentId) {
-        return enrollmentDao.findByStudentId(studentId);
+        if (!SessionManager.isAdmin()) {
+            return List.of();
+        }
+        return enrollmentService.getEnrollmentsByStudent(studentId);
     }
 
     public List<Enrollment> getEnrollmentsByCourse(int courseId) {
-        return enrollmentDao.findByCourseId(courseId);
+        if (!SessionManager.isAdmin()) {
+            return List.of();
+        }
+        return enrollmentService.getEnrollmentsByCourse(courseId);
     }
 
     public OperationResult addEnrollment(Student student, Course course) {
-        if (student == null || course == null) {
-            return OperationResult.failure("Please select both a student and a course.");
+        OperationResult auth = requireAdmin();
+        if (auth != null) {
+            return auth;
         }
-        if (enrollmentDao.isEnrolled(student.getId(), course.getId())) {
-            return OperationResult.failure("This student is already enrolled in this course.");
-        }
-
-        Enrollment enrollment = new Enrollment(
-            student.getId(), course.getId(), LocalDate.now(), Enrollment.Status.ENROLLED
-        );
-        if (enrollmentDao.create(enrollment) > 0) {
-            return OperationResult.success("Enrollment created successfully.");
-        }
-        return OperationResult.failure("Failed to create enrollment.");
+        ServiceResult<Void> result = enrollmentService.addEnrollment(student, course);
+        return toOperationResult(result);
     }
 
     public OperationResult updateEnrollmentStatus(Enrollment enrollment, Enrollment.Status newStatus) {
-        if (enrollment == null) {
-            return OperationResult.failure("Please select an enrollment to update.");
+        OperationResult auth = requireAdmin();
+        if (auth != null) {
+            return auth;
         }
-        if (newStatus == null) {
-            return OperationResult.failure("Please select a status.");
-        }
-
-        if (enrollmentDao.updateStatus(enrollment.getId(), newStatus)) {
-            return OperationResult.success("Enrollment status updated.");
-        }
-        return OperationResult.failure("Failed to update status.");
+        ServiceResult<Void> result = enrollmentService.updateEnrollmentStatus(enrollment, newStatus);
+        return toOperationResult(result);
     }
 
     public OperationResult deleteEnrollment(Enrollment enrollment) {
-        if (enrollment == null) {
-            return OperationResult.failure("Please select an enrollment to delete.");
+        OperationResult auth = requireAdmin();
+        if (auth != null) {
+            return auth;
         }
-        enrollmentDao.delete(enrollment.getId());
-        return OperationResult.success("Enrollment deleted successfully.");
+        ServiceResult<Void> result = enrollmentService.deleteEnrollment(enrollment);
+        return toOperationResult(result);
     }
 
     // ==================== Grade CRUD ====================
 
     public List<Grade> getAllGrades() {
+        if (!SessionManager.isAdmin()) {
+            return List.of();
+        }
         return gradeDao.findAll();
     }
 
     public OperationResult addGrade(Enrollment enrollment, String gradeStr, String feedback) {
+        OperationResult auth = requireAdmin();
+        if (auth != null) {
+            return auth;
+        }
         if (enrollment == null) {
             return OperationResult.failure("Please select an enrollment.");
         }
@@ -369,6 +308,10 @@ public class AdminController {
     }
 
     public OperationResult updateGrade(Grade grade, String gradeStr, String feedback) {
+        OperationResult auth = requireAdmin();
+        if (auth != null) {
+            return auth;
+        }
         if (grade == null) {
             return OperationResult.failure("Please select a grade to update.");
         }
@@ -389,6 +332,10 @@ public class AdminController {
     }
 
     public OperationResult deleteGrade(Grade grade) {
+        OperationResult auth = requireAdmin();
+        if (auth != null) {
+            return auth;
+        }
         if (grade == null) {
             return OperationResult.failure("Please select a grade to delete.");
         }
@@ -400,6 +347,9 @@ public class AdminController {
 
     public String generateReport(String reportType, Course course,
                                  LocalDate fromDate, LocalDate toDate, Student student) {
+        if (!SessionManager.isAdmin()) {
+            return "Access denied. Admin role is required.";
+        }
         if (reportType == null) {
             return null;
         }
@@ -498,13 +448,27 @@ public class AdminController {
 
         sb.append("\nEnrollments per Course:\n");
         sb.append("--------------------------------------\n");
-        List<Course> courses = courseDao.findAll();
+        List<Course> courses = courseService.getAllCourses();
         for (Course course : courses) {
-            int count = courseDao.getEnrollmentCount(course.getId());
+            int count = courseService.getEnrollmentCount(course.getId());
             sb.append(String.format("  %-30s: %d / %d\n",
                 course.getCourseCode() + " - " + course.getCourseName(),
                 count, course.getMaxCapacity()));
         }
+    }
+
+    private OperationResult toOperationResult(ServiceResult<?> serviceResult) {
+        if (serviceResult.isSuccess()) {
+            return OperationResult.success(serviceResult.getMessage());
+        }
+        return OperationResult.failure(serviceResult.getMessage());
+    }
+
+    private OperationResult requireAdmin() {
+        if (!SessionManager.isAdmin()) {
+            return OperationResult.failure("Access denied. Admin role is required.");
+        }
+        return null;
     }
 
     private void generateDateRangeReport(StringBuilder sb, LocalDate fromDate, LocalDate toDate) {

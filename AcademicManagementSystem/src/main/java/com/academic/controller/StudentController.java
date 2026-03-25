@@ -1,14 +1,12 @@
 package com.academic.controller;
 
-import com.academic.dao.CourseDao;
-import com.academic.dao.EnrollmentDao;
 import com.academic.dao.GradeDao;
-import com.academic.dao.StudentDao;
 import com.academic.model.*;
+import com.academic.service.CourseService;
+import com.academic.service.EnrollmentService;
+import com.academic.service.ServiceResult;
+import com.academic.service.StudentService;
 import com.academic.util.SessionManager;
-import com.academic.util.ValidationUtil;
-
-import java.time.LocalDate;
 import java.util.List;
 
 /**
@@ -18,15 +16,15 @@ import java.util.List;
  */
 public class StudentController {
 
-    private final StudentDao studentDao;
-    private final CourseDao courseDao;
-    private final EnrollmentDao enrollmentDao;
+    private final StudentService studentService;
+    private final CourseService courseService;
+    private final EnrollmentService enrollmentService;
     private final GradeDao gradeDao;
 
     public StudentController() {
-        this.studentDao = new StudentDao();
-        this.courseDao = new CourseDao();
-        this.enrollmentDao = new EnrollmentDao();
+        this.studentService = new StudentService();
+        this.courseService = new CourseService();
+        this.enrollmentService = new EnrollmentService();
         this.gradeDao = new GradeDao();
     }
 
@@ -56,21 +54,33 @@ public class StudentController {
 
     /** Returns the currently logged-in student. */
     public Student getCurrentStudent() {
+        if (!SessionManager.isStudent()) {
+            return null;
+        }
         return SessionManager.getCurrentStudent();
     }
 
     /** Retrieves all enrollments for the current student. */
     public List<Enrollment> getMyEnrollments(int studentId) {
-        return enrollmentDao.findByStudentId(studentId);
+        if (!SessionManager.isStudent()) {
+            return List.of();
+        }
+        return enrollmentService.getEnrollmentsByStudent(studentId);
     }
 
     /** Retrieves all available courses. */
     public List<Course> getAllCourses() {
-        return courseDao.findAll();
+        if (!SessionManager.isStudent()) {
+            return List.of();
+        }
+        return courseService.getAllCourses();
     }
 
     /** Retrieves all grades for the current student. */
     public List<Grade> getMyGrades(int studentId) {
+        if (!SessionManager.isStudent()) {
+            return List.of();
+        }
         return gradeDao.findByStudentId(studentId);
     }
 
@@ -78,67 +88,36 @@ public class StudentController {
      * Enrolls the current student in a course, with capacity and duplicate checks.
      */
     public OperationResult enroll(Student student, Course course) {
-        if (course == null) {
-            return OperationResult.failure("Please select a course to enroll in.");
+        OperationResult auth = requireStudent();
+        if (auth != null) {
+            return auth;
         }
-        if (student == null) {
-            return OperationResult.failure("Student profile not found.");
-        }
-
-        // Check if already enrolled
-        if (enrollmentDao.isEnrolled(student.getId(), course.getId())) {
-            return OperationResult.failure("You are already enrolled in this course.");
-        }
-
-        // Check course capacity
-        int enrolled = courseDao.getEnrollmentCount(course.getId());
-        if (enrolled >= course.getMaxCapacity()) {
-            return OperationResult.failure("This course has reached its maximum capacity.");
-        }
-
-        Enrollment enrollment = new Enrollment(
-            student.getId(), course.getId(),
-            LocalDate.now(), Enrollment.Status.ENROLLED
-        );
-
-        if (enrollmentDao.create(enrollment) > 0) {
-            return OperationResult.success("Successfully enrolled in " + course.getCourseCode() + ".");
-        }
-        return OperationResult.failure("Failed to enroll. Please try again.");
+        ServiceResult<Void> result = enrollmentService.studentEnroll(student, course);
+        return toOperationResult(result);
     }
 
     /**
      * Withdraws the student from an enrollment.
      */
     public OperationResult withdraw(Enrollment enrollment) {
-        if (enrollment == null) {
-            return OperationResult.failure("Please select an enrollment to withdraw from.");
+        OperationResult auth = requireStudent();
+        if (auth != null) {
+            return auth;
         }
-        if (enrollment.getStatus() != Enrollment.Status.ENROLLED) {
-            return OperationResult.failure("You can only withdraw from active enrollments.");
-        }
-
-        if (enrollmentDao.updateStatus(enrollment.getId(), Enrollment.Status.WITHDRAWN)) {
-            return OperationResult.success("Successfully withdrawn from the course.");
-        }
-        return OperationResult.failure("Failed to withdraw. Please try again.");
+        ServiceResult<Void> result = enrollmentService.withdraw(enrollment);
+        return toOperationResult(result);
     }
 
     /**
      * Deletes a withdrawn enrollment from the student's history.
      */
     public OperationResult deleteEnrollment(Enrollment enrollment) {
-        if (enrollment == null) {
-            return OperationResult.failure("Please select an enrollment to delete.");
+        OperationResult auth = requireStudent();
+        if (auth != null) {
+            return auth;
         }
-        if (enrollment.getStatus() == Enrollment.Status.ENROLLED) {
-            return OperationResult.failure("You must withdraw from the course before deleting it.");
-        }
-
-        if (enrollmentDao.delete(enrollment.getId())) {
-            return OperationResult.success("Enrollment record deleted successfully.");
-        }
-        return OperationResult.failure("Failed to delete enrollment. Please try again.");
+        ServiceResult<Void> result = enrollmentService.deleteEnrollmentFromHistory(enrollment);
+        return toOperationResult(result);
     }
 
     /**
@@ -146,28 +125,28 @@ public class StudentController {
      */
     public OperationResult updateProfile(Student student, String firstName, String lastName,
                                          String email, String programme) {
-        if (student == null) {
-            return OperationResult.failure("Student profile not found.");
+        OperationResult auth = requireStudent();
+        if (auth != null) {
+            return auth;
         }
-        if (ValidationUtil.isNullOrEmpty(firstName) || ValidationUtil.isNullOrEmpty(lastName)) {
-            return OperationResult.failure("Name cannot be empty.");
-        }
-        if (!ValidationUtil.isValidEmail(email)) {
-            return OperationResult.failure("Please enter a valid email.");
-        }
-        if (ValidationUtil.isNullOrEmpty(programme)) {
-            return OperationResult.failure("Programme cannot be empty.");
-        }
+        ServiceResult<Void> result = studentService.updateProfile(
+            student, firstName, lastName, email, programme
+        );
+        return toOperationResult(result);
+    }
 
-        student.setFirstName(firstName);
-        student.setLastName(lastName);
-        student.setEmail(email);
-        student.setProgramme(programme);
-
-        if (studentDao.update(student)) {
-            return OperationResult.success("Profile updated successfully.");
+    private OperationResult toOperationResult(ServiceResult<?> serviceResult) {
+        if (serviceResult.isSuccess()) {
+            return OperationResult.success(serviceResult.getMessage());
         }
-        return OperationResult.failure("Failed to update profile.");
+        return OperationResult.failure(serviceResult.getMessage());
+    }
+
+    private OperationResult requireStudent() {
+        if (!SessionManager.isStudent()) {
+            return OperationResult.failure("Access denied. Student role is required.");
+        }
+        return null;
     }
 
     /** Logs out the current user. */

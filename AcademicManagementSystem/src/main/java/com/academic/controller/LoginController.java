@@ -1,9 +1,10 @@
 package com.academic.controller;
 
-import com.academic.dao.StudentDao;
 import com.academic.dao.UserDao;
 import com.academic.model.Student;
 import com.academic.model.User;
+import com.academic.service.ServiceResult;
+import com.academic.service.StudentService;
 import com.academic.util.PasswordUtil;
 import com.academic.util.SessionManager;
 import com.academic.util.ValidationUtil;
@@ -16,11 +17,11 @@ import com.academic.util.ValidationUtil;
 public class LoginController {
 
     private final UserDao userDao;
-    private final StudentDao studentDao;
+    private final StudentService studentService;
 
     public LoginController() {
         this.userDao = new UserDao();
-        this.studentDao = new StudentDao();
+        this.studentService = new StudentService();
     }
 
     /**
@@ -96,7 +97,7 @@ public class LoginController {
 
         Student student = null;
         if (user.getRole() == User.Role.STUDENT) {
-            student = studentDao.findByUserId(user.getId());
+            student = studentService.findByUserId(user.getId());
             SessionManager.setCurrentStudent(student);
         }
 
@@ -132,33 +133,21 @@ public class LoginController {
             return RegisterResult.failure("Please enter your programme.");
         }
 
-        // Check if username is already taken
-        if (userDao.findByUsername(username) != null) {
-            return RegisterResult.failure("Username already taken. Please choose another.");
-        }
-
-        // Create user account
-        String hash = PasswordUtil.hashPassword(password);
-        User user = new User(username, hash, User.Role.STUDENT);
-        int userId = userDao.create(user);
-
-        if (userId == -1) {
-            return RegisterResult.failure("Registration failed. Please try again.");
-        }
-
-        // Create student profile
-        Student student = new Student(
-            userId, firstName.trim(), lastName.trim(),
-            email.trim(), studentNumber.trim().toUpperCase(), programme.trim()
+        ServiceResult<Integer> result = studentService.registerStudentAccount(
+            username, password, firstName, lastName, email, studentNumber, programme
         );
-        int studentId = studentDao.create(student);
-
-        if (studentId == -1) {
-            // Rollback user if student creation fails
-            userDao.delete(userId);
-            return RegisterResult.failure("Registration failed. Student number may already exist.");
+        if (!result.isSuccess()) {
+            if ("Username already taken.".equals(result.getMessage())) {
+                return RegisterResult.failure("Username already taken. Please choose another.");
+            }
+            if ("Failed to create student. Student number may already exist.".equals(result.getMessage())) {
+                return RegisterResult.failure("Registration failed. Student number may already exist.");
+            }
+            if ("Failed to create user account.".equals(result.getMessage())) {
+                return RegisterResult.failure("Registration failed. Please try again.");
+            }
+            return RegisterResult.failure(result.getMessage());
         }
-
         return RegisterResult.success();
     }
 }

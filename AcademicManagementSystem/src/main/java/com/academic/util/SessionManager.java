@@ -39,6 +39,16 @@ public class SessionManager {
         return currentUser != null && currentUser.getRole() == User.Role.ADMIN;
     }
 
+    /** Checks if the current user has student privileges */
+    public static boolean isStudent() {
+        return currentUser != null && currentUser.getRole() == User.Role.STUDENT;
+    }
+
+    /** Checks if the current user has lecturer privileges */
+    public static boolean isLecturer() {
+        return currentUser != null && currentUser.getRole() == User.Role.LECTURER;
+    }
+
     /** Checks if a user is currently logged in */
     public static boolean isLoggedIn() {
         return currentUser != null;

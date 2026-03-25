@@ -20,6 +20,7 @@ A JavaFX desktop application for managing students, lecturers, courses, enrollme
 12. [Testing](#testing)
 13. [Default Accounts & Sample Data](#default-accounts--sample-data)
 14. [Design Decisions](#design-decisions)
+15. [Project TODO Backlog](#project-todo-backlog)
 
 ---
 
@@ -34,6 +35,12 @@ A JavaFX desktop application for managing students, lecturers, courses, enrollme
 | Build Tool       | Apache Maven (Wrapper)  | 3.9.6    |
 | Compiler Plugin  | maven-compiler-plugin   | 3.12.1   |
 | Packaging        | maven-shade-plugin      | 3.5.1    |
+
+---
+
+## Project TODO Backlog
+
+See [TODO.md](TODO.md) for the ranked and tagged roadmap.
 
 ---
 

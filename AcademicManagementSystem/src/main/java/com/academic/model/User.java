@@ -2,13 +2,13 @@ package com.academic.model;
 
 /**
  * Represents a user account in the system.
- * Users can have either STUDENT or ADMIN role.
+ * Users can have STUDENT, ADMIN, or LECTURER role.
  */
 public class User {
 
     /** Defines the privilege levels in the system */
     public enum Role {
-        STUDENT, ADMIN
+        STUDENT, ADMIN, LECTURER
     }
 
     private int id;
