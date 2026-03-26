@@ -6,7 +6,6 @@ import com.academic.service.CourseService;
 import com.academic.service.EnrollmentService;
 import com.academic.service.ServiceResult;
 import com.academic.service.StudentService;
-import com.academic.util.PasswordUtil;
 import com.academic.util.SessionManager;
 import com.academic.util.ValidationUtil;
 
@@ -21,7 +20,6 @@ import java.util.Map;
  */
 public class AdminController {
 
-    private final UserDao userDao;
     private final LecturerDao lecturerDao;
     private final GradeDao gradeDao;
     private final StudentService studentService;
@@ -29,7 +27,6 @@ public class AdminController {
     private final EnrollmentService enrollmentService;
 
     public AdminController() {
-        this.userDao = new UserDao();
         this.lecturerDao = new LecturerDao();
         this.gradeDao = new GradeDao();
         this.studentService = new StudentService();

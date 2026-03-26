@@ -38,7 +38,37 @@ A JavaFX desktop application for managing students, lecturers, courses, enrollme
 
 ---
 
-## Project TODO Backlog
+---
+
+## Troubleshooting
+
+### Database Initialization Fails
+
+If the application fails to start with database-related errors:
+
+1. **Delete the old database**: Navigate to the project directory and delete `academic_system.db` if it exists. The database will be automatically recreated on next run.
+
+   ```powershell
+   Remove-Item academic_system.db -Force
+   ```
+
+2. **Check logs**: The application logs all database operations to `logs/error.log` and `logs/application.log`. Check these files for detailed error messages.
+
+   See [LOGGING.md](LOGGING.md) for more information on structured logging and error diagnostics.
+
+3. **Verify Java 23**: Ensure you have Java 23 installed:
+
+   ```powershell
+   java -version
+   ```
+
+### Common Issues
+
+- **"Foreign key constraint failed"**: Drop the database (see above) and restart. This usually occurs only on corrupted databases from previous failed runs.
+- **"Module not found" errors**: Ensure all dependencies are downloaded by running `.\mvnw install` first.
+- **UI doesn't appear**: The app may be initializing the database. Check `logs/application.log` for progress. Initialization typically takes 5-10 seconds on first run.
+
+---
 
 See [TODO.md](TODO.md) for the ranked and tagged roadmap.
 
@@ -445,6 +475,12 @@ To set it permanently:
 
 ```powershell
 .\mvnw.cmd javafx:run
+```
+
+Or simply:
+
+```powershell
+.\mvnw javafx:run
 ```
 
 ### Build a portable fat JAR

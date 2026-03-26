@@ -1,0 +1,363 @@
+2026-03-25 20:31:56.535 [JavaFX Application Thread] INFO  [com.academic.dao.DatabaseManager] - Initializing DatabaseManager with default URL: jdbc:sqlite:academic_system.db
+2026-03-25 20:31:57.352 [JavaFX Application Thread] INFO  [com.academic.dao.DatabaseManager] - Database connection established
+2026-03-25 20:31:57.357 [JavaFX Application Thread] DEBUG [com.academic.dao.DatabaseManager] - Starting database transaction
+2026-03-25 20:31:57.393 [JavaFX Application Thread] INFO  [com.academic.dao.DatabaseManager] - Current database schema version: 0
+2026-03-25 20:31:57.396 [JavaFX Application Thread] INFO  [com.academic.dao.DatabaseManager] - Applying migration v1: Create core tables
+2026-03-25 20:31:57.442 [JavaFX Application Thread] INFO  [com.academic.dao.DatabaseManager] - Migration v1 completed successfully
+2026-03-25 20:31:57.442 [JavaFX Application Thread] INFO  [com.academic.dao.DatabaseManager] - Applying migration v2: Add reliability indexes
+2026-03-25 20:31:57.443 [JavaFX Application Thread] INFO  [com.academic.dao.DatabaseManager] - Migration v2 completed successfully
+2026-03-25 20:31:57.450 [JavaFX Application Thread] ERROR [com.academic.dao.DatabaseManager] - Transaction failed, rolling back: [SQLITE_CONSTRAINT_FOREIGNKEY] A foreign key constraint failed (FOREIGN KEY constraint failed)
+org.sqlite.SQLiteException: [SQLITE_CONSTRAINT_FOREIGNKEY] A foreign key constraint failed (FOREIGN KEY constraint failed)
+	at org.sqlite.core.DB.newSQLException(DB.java:1179)
+	at org.sqlite.core.DB.newSQLException(DB.java:1190)
+	at org.sqlite.core.DB.execute(DB.java:985)
+	at org.sqlite.core.CoreStatement.exec(CoreStatement.java:79)
+	at org.sqlite.jdbc3.JDBC3Statement.lambda$execute$0(JDBC3Statement.java:54)
+	at org.sqlite.jdbc3.JDBC3Statement.withConnectionTimeout(JDBC3Statement.java:459)
+	at org.sqlite.jdbc3.JDBC3Statement.execute(JDBC3Statement.java:42)
+	at com.academic.dao.DatabaseManager.seedDummyData(DatabaseManager.java:324)
+	at com.academic.dao.DatabaseManager.seedInitialData(DatabaseManager.java:292)
+	at com.academic.dao.DatabaseManager.lambda$initializeSchema$0(DatabaseManager.java:140)
+	at com.academic.dao.DatabaseManager.executeInTransaction(DatabaseManager.java:105)
+	at com.academic.dao.DatabaseManager.initializeSchema(DatabaseManager.java:137)
+	at com.academic.dao.DatabaseManager.<init>(DatabaseManager.java:56)
+	at com.academic.dao.DatabaseManager.getInstance(DatabaseManager.java:82)
+	at com.academic.App.start(App.java:18)
+	at javafx.graphics@23.0.1/com.sun.javafx.application.LauncherImpl.lambda$launchApplication1$9(LauncherImpl.java:839)
+	at javafx.graphics@23.0.1/com.sun.javafx.application.PlatformImpl.lambda$runAndWait$12(PlatformImpl.java:483)
+	at javafx.graphics@23.0.1/com.sun.javafx.application.PlatformImpl.lambda$runLater$10(PlatformImpl.java:456)
+	at java.base/java.security.AccessController.doPrivileged(AccessController.java:400)
+	at javafx.graphics@23.0.1/com.sun.javafx.application.PlatformImpl.lambda$runLater$11(PlatformImpl.java:455)
+	at javafx.graphics@23.0.1/com.sun.glass.ui.InvokeLaterDispatcher$Future.run(InvokeLaterDispatcher.java:95)
+	at javafx.graphics@23.0.1/com.sun.glass.ui.win.WinApplication._runLoop(Native Method)
+	at javafx.graphics@23.0.1/com.sun.glass.ui.win.WinApplication.lambda$runLoop$3(WinApplication.java:184)
+	at java.base/java.lang.Thread.run(Thread.java:1575)
+2026-03-25 20:31:57.454 [JavaFX Application Thread] ERROR [com.academic.dao.DatabaseManager] - Failed to initialize database: [SQLITE_CONSTRAINT_FOREIGNKEY] A foreign key constraint failed (FOREIGN KEY constraint failed)
+org.sqlite.SQLiteException: [SQLITE_CONSTRAINT_FOREIGNKEY] A foreign key constraint failed (FOREIGN KEY constraint failed)
+	at org.sqlite.core.DB.newSQLException(DB.java:1179)
+	at org.sqlite.core.DB.newSQLException(DB.java:1190)
+	at org.sqlite.core.DB.execute(DB.java:985)
+	at org.sqlite.core.CoreStatement.exec(CoreStatement.java:79)
+	at org.sqlite.jdbc3.JDBC3Statement.lambda$execute$0(JDBC3Statement.java:54)
+	at org.sqlite.jdbc3.JDBC3Statement.withConnectionTimeout(JDBC3Statement.java:459)
+	at org.sqlite.jdbc3.JDBC3Statement.execute(JDBC3Statement.java:42)
+	at com.academic.dao.DatabaseManager.seedDummyData(DatabaseManager.java:324)
+	at com.academic.dao.DatabaseManager.seedInitialData(DatabaseManager.java:292)
+	at com.academic.dao.DatabaseManager.lambda$initializeSchema$0(DatabaseManager.java:140)
+	at com.academic.dao.DatabaseManager.executeInTransaction(DatabaseManager.java:105)
+	at com.academic.dao.DatabaseManager.initializeSchema(DatabaseManager.java:137)
+	at com.academic.dao.DatabaseManager.<init>(DatabaseManager.java:56)
+	at com.academic.dao.DatabaseManager.getInstance(DatabaseManager.java:82)
+	at com.academic.App.start(App.java:18)
+	at javafx.graphics@23.0.1/com.sun.javafx.application.LauncherImpl.lambda$launchApplication1$9(LauncherImpl.java:839)
+	at javafx.graphics@23.0.1/com.sun.javafx.application.PlatformImpl.lambda$runAndWait$12(PlatformImpl.java:483)
+	at javafx.graphics@23.0.1/com.sun.javafx.application.PlatformImpl.lambda$runLater$10(PlatformImpl.java:456)
+	at java.base/java.security.AccessController.doPrivileged(AccessController.java:400)
+	at javafx.graphics@23.0.1/com.sun.javafx.application.PlatformImpl.lambda$runLater$11(PlatformImpl.java:455)
+	at javafx.graphics@23.0.1/com.sun.glass.ui.InvokeLaterDispatcher$Future.run(InvokeLaterDispatcher.java:95)
+	at javafx.graphics@23.0.1/com.sun.glass.ui.win.WinApplication._runLoop(Native Method)
+	at javafx.graphics@23.0.1/com.sun.glass.ui.win.WinApplication.lambda$runLoop$3(WinApplication.java:184)
+	at java.base/java.lang.Thread.run(Thread.java:1575)
+2026-03-25 20:31:57.457 [JavaFX Application Thread] INFO  [com.academic.dao.DatabaseManager] - Initializing DatabaseManager with default URL: jdbc:sqlite:academic_system.db
+2026-03-25 20:31:57.458 [JavaFX Application Thread] INFO  [com.academic.dao.DatabaseManager] - Database connection established
+2026-03-25 20:31:57.459 [JavaFX Application Thread] DEBUG [com.academic.dao.DatabaseManager] - Starting database transaction
+2026-03-25 20:31:57.476 [JavaFX Application Thread] INFO  [com.academic.dao.DatabaseManager] - Current database schema version: 0
+2026-03-25 20:31:57.477 [JavaFX Application Thread] INFO  [com.academic.dao.DatabaseManager] - Applying migration v1: Create core tables
+2026-03-25 20:31:57.478 [JavaFX Application Thread] INFO  [com.academic.dao.DatabaseManager] - Migration v1 completed successfully
+2026-03-25 20:31:57.478 [JavaFX Application Thread] INFO  [com.academic.dao.DatabaseManager] - Applying migration v2: Add reliability indexes
+2026-03-25 20:31:57.479 [JavaFX Application Thread] INFO  [com.academic.dao.DatabaseManager] - Migration v2 completed successfully
+2026-03-25 20:31:57.482 [JavaFX Application Thread] ERROR [com.academic.dao.DatabaseManager] - Transaction failed, rolling back: [SQLITE_CONSTRAINT_FOREIGNKEY] A foreign key constraint failed (FOREIGN KEY constraint failed)
+org.sqlite.SQLiteException: [SQLITE_CONSTRAINT_FOREIGNKEY] A foreign key constraint failed (FOREIGN KEY constraint failed)
+	at org.sqlite.core.DB.newSQLException(DB.java:1179)
+	at org.sqlite.core.DB.newSQLException(DB.java:1190)
+	at org.sqlite.core.DB.execute(DB.java:985)
+	at org.sqlite.core.CoreStatement.exec(CoreStatement.java:79)
+	at org.sqlite.jdbc3.JDBC3Statement.lambda$execute$0(JDBC3Statement.java:54)
+	at org.sqlite.jdbc3.JDBC3Statement.withConnectionTimeout(JDBC3Statement.java:459)
+	at org.sqlite.jdbc3.JDBC3Statement.execute(JDBC3Statement.java:42)
+	at com.academic.dao.DatabaseManager.seedDummyData(DatabaseManager.java:324)
+	at com.academic.dao.DatabaseManager.seedInitialData(DatabaseManager.java:292)
+	at com.academic.dao.DatabaseManager.lambda$initializeSchema$0(DatabaseManager.java:140)
+	at com.academic.dao.DatabaseManager.executeInTransaction(DatabaseManager.java:105)
+	at com.academic.dao.DatabaseManager.initializeSchema(DatabaseManager.java:137)
+	at com.academic.dao.DatabaseManager.<init>(DatabaseManager.java:56)
+	at com.academic.dao.DatabaseManager.getInstance(DatabaseManager.java:82)
+	at com.academic.App.stop(App.java:37)
+	at javafx.graphics@23.0.1/com.sun.javafx.application.LauncherImpl.lambda$launchApplication1$10(LauncherImpl.java:858)
+	at javafx.graphics@23.0.1/com.sun.javafx.application.PlatformImpl.lambda$runAndWait$12(PlatformImpl.java:483)
+	at javafx.graphics@23.0.1/com.sun.javafx.application.PlatformImpl.lambda$runLater$10(PlatformImpl.java:456)
+	at java.base/java.security.AccessController.doPrivileged(AccessController.java:400)
+	at javafx.graphics@23.0.1/com.sun.javafx.application.PlatformImpl.lambda$runLater$11(PlatformImpl.java:455)
+	at javafx.graphics@23.0.1/com.sun.glass.ui.InvokeLaterDispatcher$Future.run(InvokeLaterDispatcher.java:95)
+	at javafx.graphics@23.0.1/com.sun.glass.ui.win.WinApplication._runLoop(Native Method)
+	at javafx.graphics@23.0.1/com.sun.glass.ui.win.WinApplication.lambda$runLoop$3(WinApplication.java:184)
+	at java.base/java.lang.Thread.run(Thread.java:1575)
+2026-03-25 20:31:57.485 [JavaFX Application Thread] ERROR [com.academic.dao.DatabaseManager] - Failed to initialize database: [SQLITE_CONSTRAINT_FOREIGNKEY] A foreign key constraint failed (FOREIGN KEY constraint failed)
+org.sqlite.SQLiteException: [SQLITE_CONSTRAINT_FOREIGNKEY] A foreign key constraint failed (FOREIGN KEY constraint failed)
+	at org.sqlite.core.DB.newSQLException(DB.java:1179)
+	at org.sqlite.core.DB.newSQLException(DB.java:1190)
+	at org.sqlite.core.DB.execute(DB.java:985)
+	at org.sqlite.core.CoreStatement.exec(CoreStatement.java:79)
+	at org.sqlite.jdbc3.JDBC3Statement.lambda$execute$0(JDBC3Statement.java:54)
+	at org.sqlite.jdbc3.JDBC3Statement.withConnectionTimeout(JDBC3Statement.java:459)
+	at org.sqlite.jdbc3.JDBC3Statement.execute(JDBC3Statement.java:42)
+	at com.academic.dao.DatabaseManager.seedDummyData(DatabaseManager.java:324)
+	at com.academic.dao.DatabaseManager.seedInitialData(DatabaseManager.java:292)
+	at com.academic.dao.DatabaseManager.lambda$initializeSchema$0(DatabaseManager.java:140)
+	at com.academic.dao.DatabaseManager.executeInTransaction(DatabaseManager.java:105)
+	at com.academic.dao.DatabaseManager.initializeSchema(DatabaseManager.java:137)
+	at com.academic.dao.DatabaseManager.<init>(DatabaseManager.java:56)
+	at com.academic.dao.DatabaseManager.getInstance(DatabaseManager.java:82)
+	at com.academic.App.stop(App.java:37)
+	at javafx.graphics@23.0.1/com.sun.javafx.application.LauncherImpl.lambda$launchApplication1$10(LauncherImpl.java:858)
+	at javafx.graphics@23.0.1/com.sun.javafx.application.PlatformImpl.lambda$runAndWait$12(PlatformImpl.java:483)
+	at javafx.graphics@23.0.1/com.sun.javafx.application.PlatformImpl.lambda$runLater$10(PlatformImpl.java:456)
+	at java.base/java.security.AccessController.doPrivileged(AccessController.java:400)
+	at javafx.graphics@23.0.1/com.sun.javafx.application.PlatformImpl.lambda$runLater$11(PlatformImpl.java:455)
+	at javafx.graphics@23.0.1/com.sun.glass.ui.InvokeLaterDispatcher$Future.run(InvokeLaterDispatcher.java:95)
+	at javafx.graphics@23.0.1/com.sun.glass.ui.win.WinApplication._runLoop(Native Method)
+	at javafx.graphics@23.0.1/com.sun.glass.ui.win.WinApplication.lambda$runLoop$3(WinApplication.java:184)
+	at java.base/java.lang.Thread.run(Thread.java:1575)
+2026-03-25 20:37:22.717 [JavaFX Application Thread] INFO  [com.academic.dao.DatabaseManager] - Initializing DatabaseManager with default URL: jdbc:sqlite:academic_system.db
+2026-03-25 20:37:24.114 [JavaFX Application Thread] INFO  [com.academic.dao.DatabaseManager] - Database connection established
+2026-03-25 20:37:24.122 [JavaFX Application Thread] DEBUG [com.academic.dao.DatabaseManager] - Starting database transaction
+2026-03-25 20:37:24.130 [JavaFX Application Thread] INFO  [com.academic.dao.DatabaseManager] - Current database schema version: 0
+2026-03-25 20:37:24.135 [JavaFX Application Thread] INFO  [com.academic.dao.DatabaseManager] - Applying migration v1: Create core tables
+2026-03-25 20:37:24.145 [JavaFX Application Thread] INFO  [com.academic.dao.DatabaseManager] - Migration v1 completed successfully
+2026-03-25 20:37:24.146 [JavaFX Application Thread] INFO  [com.academic.dao.DatabaseManager] - Applying migration v2: Add reliability indexes
+2026-03-25 20:37:24.146 [JavaFX Application Thread] INFO  [com.academic.dao.DatabaseManager] - Migration v2 completed successfully
+2026-03-25 20:37:24.155 [JavaFX Application Thread] DEBUG [com.academic.dao.DatabaseManager] - Transaction committed successfully
+2026-03-25 20:37:24.155 [JavaFX Application Thread] INFO  [com.academic.dao.DatabaseManager] - Database schema initialized successfully
+2026-03-25 20:38:26.622 [JavaFX Application Thread] INFO  [com.academic.dao.DatabaseManager] - Initializing DatabaseManager with default URL: jdbc:sqlite:academic_system.db
+2026-03-25 20:38:26.740 [JavaFX Application Thread] INFO  [com.academic.dao.DatabaseManager] - Database connection established
+2026-03-25 20:38:26.742 [JavaFX Application Thread] DEBUG [com.academic.dao.DatabaseManager] - Starting database transaction
+2026-03-25 20:38:26.747 [JavaFX Application Thread] INFO  [com.academic.dao.DatabaseManager] - Current database schema version: 2
+2026-03-25 20:38:26.759 [JavaFX Application Thread] DEBUG [com.academic.dao.DatabaseManager] - Transaction committed successfully
+2026-03-25 20:38:26.759 [JavaFX Application Thread] INFO  [com.academic.dao.DatabaseManager] - Database schema initialized successfully
+2026-03-25 20:38:44.406 [JavaFX Application Thread] INFO  [c.a.controller.LoginController] - Login attempt for username: admin
+2026-03-25 20:38:44.413 [JavaFX Application Thread] INFO  [com.academic.util.ErrorHandler] - AUTH: LOGIN for user 'admin' - Success [Authentication successful]
+2026-03-25 20:38:44.415 [JavaFX Application Thread] INFO  [com.academic.util.ErrorHandler] - AUTH: LOGIN_SUCCESS for user 'admin' - Success [User role: ADMIN]
+2026-03-25 20:38:44.416 [JavaFX Application Thread] INFO  [c.a.controller.LoginController] - User admin logged in successfully with role: ADMIN
+2026-03-25 20:52:04.926 [JavaFX Application Thread] DEBUG [com.academic.dao.DatabaseManager] - Starting database transaction
+2026-03-25 20:52:04.935 [JavaFX Application Thread] INFO  [com.academic.util.ErrorHandler] - DB: INSERT User with ID 8 - Success
+2026-03-25 20:52:04.936 [JavaFX Application Thread] INFO  [com.academic.dao.UserDao] - User created successfully: username=PotatoPeople8, id=8
+2026-03-25 20:52:04.941 [JavaFX Application Thread] DEBUG [com.academic.dao.DatabaseManager] - Transaction committed successfully
+2026-03-25 20:52:22.905 [JavaFX Application Thread] INFO  [c.a.controller.LoginController] - Login attempt for username: PotatoPeople8
+2026-03-25 20:52:22.906 [JavaFX Application Thread] INFO  [com.academic.util.ErrorHandler] - AUTH: LOGIN for user 'PotatoPeople8' - Success [Authentication successful]
+2026-03-25 20:52:22.907 [JavaFX Application Thread] INFO  [com.academic.util.ErrorHandler] - AUTH: LOGIN_SUCCESS for user 'PotatoPeople8' - Success [User role: STUDENT]
+2026-03-25 20:52:22.907 [JavaFX Application Thread] INFO  [c.a.controller.LoginController] - Student session set for user ID: 8
+2026-03-25 20:52:22.907 [JavaFX Application Thread] INFO  [c.a.controller.LoginController] - User PotatoPeople8 logged in successfully with role: STUDENT
+2026-03-25 20:52:24.887 [JavaFX Application Thread] INFO  [c.a.controller.LoginController] - Login attempt for username: PotatoPeople8
+2026-03-25 20:52:24.888 [JavaFX Application Thread] INFO  [com.academic.util.ErrorHandler] - AUTH: LOGIN for user 'PotatoPeople8' - Success [Authentication successful]
+2026-03-25 20:52:24.889 [JavaFX Application Thread] INFO  [com.academic.util.ErrorHandler] - AUTH: LOGIN_SUCCESS for user 'PotatoPeople8' - Success [User role: STUDENT]
+2026-03-25 20:52:24.889 [JavaFX Application Thread] INFO  [c.a.controller.LoginController] - Student session set for user ID: 8
+2026-03-25 20:52:24.889 [JavaFX Application Thread] INFO  [c.a.controller.LoginController] - User PotatoPeople8 logged in successfully with role: STUDENT
+2026-03-25 20:52:26.855 [JavaFX Application Thread] INFO  [c.a.controller.LoginController] - Login attempt for username: PotatoPeople8
+2026-03-25 20:52:26.857 [JavaFX Application Thread] INFO  [com.academic.util.ErrorHandler] - AUTH: LOGIN for user 'PotatoPeople8' - Success [Authentication successful]
+2026-03-25 20:52:26.857 [JavaFX Application Thread] INFO  [com.academic.util.ErrorHandler] - AUTH: LOGIN_SUCCESS for user 'PotatoPeople8' - Success [User role: STUDENT]
+2026-03-25 20:52:26.857 [JavaFX Application Thread] INFO  [c.a.controller.LoginController] - Student session set for user ID: 8
+2026-03-25 20:52:26.857 [JavaFX Application Thread] INFO  [c.a.controller.LoginController] - User PotatoPeople8 logged in successfully with role: STUDENT
+2026-03-25 20:52:27.012 [JavaFX Application Thread] INFO  [c.a.controller.LoginController] - Login attempt for username: PotatoPeople8
+2026-03-25 20:52:27.013 [JavaFX Application Thread] INFO  [com.academic.util.ErrorHandler] - AUTH: LOGIN for user 'PotatoPeople8' - Success [Authentication successful]
+2026-03-25 20:52:27.013 [JavaFX Application Thread] INFO  [com.academic.util.ErrorHandler] - AUTH: LOGIN_SUCCESS for user 'PotatoPeople8' - Success [User role: STUDENT]
+2026-03-25 20:52:27.013 [JavaFX Application Thread] INFO  [c.a.controller.LoginController] - Student session set for user ID: 8
+2026-03-25 20:52:27.013 [JavaFX Application Thread] INFO  [c.a.controller.LoginController] - User PotatoPeople8 logged in successfully with role: STUDENT
+2026-03-25 20:52:29.805 [JavaFX Application Thread] INFO  [c.a.controller.LoginController] - Login attempt for username: PotatoPeople8
+2026-03-25 20:52:29.807 [JavaFX Application Thread] INFO  [com.academic.util.ErrorHandler] - AUTH: LOGIN for user 'PotatoPeople8' - Success [Authentication successful]
+2026-03-25 20:52:29.807 [JavaFX Application Thread] INFO  [com.academic.util.ErrorHandler] - AUTH: LOGIN_SUCCESS for user 'PotatoPeople8' - Success [User role: STUDENT]
+2026-03-25 20:52:29.807 [JavaFX Application Thread] INFO  [c.a.controller.LoginController] - Student session set for user ID: 8
+2026-03-25 20:52:29.807 [JavaFX Application Thread] INFO  [c.a.controller.LoginController] - User PotatoPeople8 logged in successfully with role: STUDENT
+2026-03-25 20:52:30.635 [JavaFX Application Thread] INFO  [c.a.controller.LoginController] - Login attempt for username: PotatoPeople8
+2026-03-25 20:52:30.636 [JavaFX Application Thread] INFO  [com.academic.util.ErrorHandler] - AUTH: LOGIN for user 'PotatoPeople8' - Success [Authentication successful]
+2026-03-25 20:52:30.636 [JavaFX Application Thread] INFO  [com.academic.util.ErrorHandler] - AUTH: LOGIN_SUCCESS for user 'PotatoPeople8' - Success [User role: STUDENT]
+2026-03-25 20:52:30.636 [JavaFX Application Thread] INFO  [c.a.controller.LoginController] - Student session set for user ID: 8
+2026-03-25 20:52:30.636 [JavaFX Application Thread] INFO  [c.a.controller.LoginController] - User PotatoPeople8 logged in successfully with role: STUDENT
+2026-03-25 20:52:30.971 [JavaFX Application Thread] INFO  [c.a.controller.LoginController] - Login attempt for username: PotatoPeople8
+2026-03-25 20:52:30.971 [JavaFX Application Thread] INFO  [com.academic.util.ErrorHandler] - AUTH: LOGIN for user 'PotatoPeople8' - Success [Authentication successful]
+2026-03-25 20:52:30.971 [JavaFX Application Thread] INFO  [com.academic.util.ErrorHandler] - AUTH: LOGIN_SUCCESS for user 'PotatoPeople8' - Success [User role: STUDENT]
+2026-03-25 20:52:30.971 [JavaFX Application Thread] INFO  [c.a.controller.LoginController] - Student session set for user ID: 8
+2026-03-25 20:52:30.971 [JavaFX Application Thread] INFO  [c.a.controller.LoginController] - User PotatoPeople8 logged in successfully with role: STUDENT
+2026-03-25 20:52:33.367 [JavaFX Application Thread] INFO  [c.a.controller.LoginController] - Login attempt for username: PotatoPeople8
+2026-03-25 20:52:33.369 [JavaFX Application Thread] INFO  [com.academic.util.ErrorHandler] - AUTH: LOGIN for user 'PotatoPeople8' - Success [Authentication successful]
+2026-03-25 20:52:33.369 [JavaFX Application Thread] INFO  [com.academic.util.ErrorHandler] - AUTH: LOGIN_SUCCESS for user 'PotatoPeople8' - Success [User role: STUDENT]
+2026-03-25 20:52:33.369 [JavaFX Application Thread] INFO  [c.a.controller.LoginController] - Student session set for user ID: 8
+2026-03-25 20:52:33.369 [JavaFX Application Thread] INFO  [c.a.controller.LoginController] - User PotatoPeople8 logged in successfully with role: STUDENT
+2026-03-25 20:52:36.691 [JavaFX Application Thread] INFO  [c.a.controller.LoginController] - Login attempt for username: PotatoPoeple8
+2026-03-25 20:52:36.692 [JavaFX Application Thread] INFO  [com.academic.util.ErrorHandler] - AUTH: LOGIN for user 'PotatoPoeple8' - Failed [Invalid credentials]
+2026-03-25 20:52:36.692 [JavaFX Application Thread] INFO  [com.academic.util.ErrorHandler] - AUTH: LOGIN_FAILED for user 'PotatoPoeple8' - Failed [Invalid credentials provided]
+2026-03-25 20:52:36.692 [JavaFX Application Thread] WARN  [c.a.controller.LoginController] - Failed login attempt for username: PotatoPoeple8
+2026-03-25 20:52:40.385 [JavaFX Application Thread] INFO  [c.a.controller.LoginController] - Login attempt for username: PotatoPeople8
+2026-03-25 20:52:40.386 [JavaFX Application Thread] INFO  [com.academic.util.ErrorHandler] - AUTH: LOGIN for user 'PotatoPeople8' - Success [Authentication successful]
+2026-03-25 20:52:40.386 [JavaFX Application Thread] INFO  [com.academic.util.ErrorHandler] - AUTH: LOGIN_SUCCESS for user 'PotatoPeople8' - Success [User role: STUDENT]
+2026-03-25 20:52:40.386 [JavaFX Application Thread] INFO  [c.a.controller.LoginController] - Student session set for user ID: 8
+2026-03-25 20:52:40.386 [JavaFX Application Thread] INFO  [c.a.controller.LoginController] - User PotatoPeople8 logged in successfully with role: STUDENT
+2026-03-25 20:52:41.112 [JavaFX Application Thread] INFO  [c.a.controller.LoginController] - Login attempt for username: PotatoPeople8
+2026-03-25 20:52:41.113 [JavaFX Application Thread] INFO  [com.academic.util.ErrorHandler] - AUTH: LOGIN for user 'PotatoPeople8' - Success [Authentication successful]
+2026-03-25 20:52:41.113 [JavaFX Application Thread] INFO  [com.academic.util.ErrorHandler] - AUTH: LOGIN_SUCCESS for user 'PotatoPeople8' - Success [User role: STUDENT]
+2026-03-25 20:52:41.115 [JavaFX Application Thread] INFO  [c.a.controller.LoginController] - Student session set for user ID: 8
+2026-03-25 20:52:41.115 [JavaFX Application Thread] INFO  [c.a.controller.LoginController] - User PotatoPeople8 logged in successfully with role: STUDENT
+2026-03-25 20:52:41.336 [JavaFX Application Thread] INFO  [c.a.controller.LoginController] - Login attempt for username: PotatoPeople8
+2026-03-25 20:52:41.336 [JavaFX Application Thread] INFO  [com.academic.util.ErrorHandler] - AUTH: LOGIN for user 'PotatoPeople8' - Success [Authentication successful]
+2026-03-25 20:52:41.336 [JavaFX Application Thread] INFO  [com.academic.util.ErrorHandler] - AUTH: LOGIN_SUCCESS for user 'PotatoPeople8' - Success [User role: STUDENT]
+2026-03-25 20:52:41.337 [JavaFX Application Thread] INFO  [c.a.controller.LoginController] - Student session set for user ID: 8
+2026-03-25 20:52:41.337 [JavaFX Application Thread] INFO  [c.a.controller.LoginController] - User PotatoPeople8 logged in successfully with role: STUDENT
+2026-03-25 20:52:42.724 [JavaFX Application Thread] INFO  [c.a.controller.LoginController] - Login attempt for username: PotatoPeople8
+2026-03-25 20:52:42.725 [JavaFX Application Thread] INFO  [com.academic.util.ErrorHandler] - AUTH: LOGIN for user 'PotatoPeople8' - Success [Authentication successful]
+2026-03-25 20:52:42.725 [JavaFX Application Thread] INFO  [com.academic.util.ErrorHandler] - AUTH: LOGIN_SUCCESS for user 'PotatoPeople8' - Success [User role: STUDENT]
+2026-03-25 20:52:42.725 [JavaFX Application Thread] INFO  [c.a.controller.LoginController] - Student session set for user ID: 8
+2026-03-25 20:52:42.725 [JavaFX Application Thread] INFO  [c.a.controller.LoginController] - User PotatoPeople8 logged in successfully with role: STUDENT
+2026-03-25 20:52:42.908 [JavaFX Application Thread] INFO  [c.a.controller.LoginController] - Login attempt for username: PotatoPeople8
+2026-03-25 20:52:42.908 [JavaFX Application Thread] INFO  [com.academic.util.ErrorHandler] - AUTH: LOGIN for user 'PotatoPeople8' - Success [Authentication successful]
+2026-03-25 20:52:42.908 [JavaFX Application Thread] INFO  [com.academic.util.ErrorHandler] - AUTH: LOGIN_SUCCESS for user 'PotatoPeople8' - Success [User role: STUDENT]
+2026-03-25 20:52:42.908 [JavaFX Application Thread] INFO  [c.a.controller.LoginController] - Student session set for user ID: 8
+2026-03-25 20:52:42.908 [JavaFX Application Thread] INFO  [c.a.controller.LoginController] - User PotatoPeople8 logged in successfully with role: STUDENT
+2026-03-25 20:52:43.067 [JavaFX Application Thread] INFO  [c.a.controller.LoginController] - Login attempt for username: PotatoPeople8
+2026-03-25 20:52:43.068 [JavaFX Application Thread] INFO  [com.academic.util.ErrorHandler] - AUTH: LOGIN for user 'PotatoPeople8' - Success [Authentication successful]
+2026-03-25 20:52:43.068 [JavaFX Application Thread] INFO  [com.academic.util.ErrorHandler] - AUTH: LOGIN_SUCCESS for user 'PotatoPeople8' - Success [User role: STUDENT]
+2026-03-25 20:52:43.068 [JavaFX Application Thread] INFO  [c.a.controller.LoginController] - Student session set for user ID: 8
+2026-03-25 20:52:43.068 [JavaFX Application Thread] INFO  [c.a.controller.LoginController] - User PotatoPeople8 logged in successfully with role: STUDENT
+2026-03-25 20:52:43.237 [JavaFX Application Thread] INFO  [c.a.controller.LoginController] - Login attempt for username: PotatoPeople8
+2026-03-25 20:52:43.238 [JavaFX Application Thread] INFO  [com.academic.util.ErrorHandler] - AUTH: LOGIN for user 'PotatoPeople8' - Success [Authentication successful]
+2026-03-25 20:52:43.238 [JavaFX Application Thread] INFO  [com.academic.util.ErrorHandler] - AUTH: LOGIN_SUCCESS for user 'PotatoPeople8' - Success [User role: STUDENT]
+2026-03-25 20:52:43.238 [JavaFX Application Thread] INFO  [c.a.controller.LoginController] - Student session set for user ID: 8
+2026-03-25 20:52:43.238 [JavaFX Application Thread] INFO  [c.a.controller.LoginController] - User PotatoPeople8 logged in successfully with role: STUDENT
+2026-03-25 20:52:52.047 [JavaFX Application Thread] INFO  [c.a.controller.LoginController] - Login attempt for username: PotatoPeople8
+2026-03-25 20:52:52.049 [JavaFX Application Thread] INFO  [com.academic.util.ErrorHandler] - AUTH: LOGIN for user 'PotatoPeople8' - Success [Authentication successful]
+2026-03-25 20:52:52.049 [JavaFX Application Thread] INFO  [com.academic.util.ErrorHandler] - AUTH: LOGIN_SUCCESS for user 'PotatoPeople8' - Success [User role: STUDENT]
+2026-03-25 20:52:52.049 [JavaFX Application Thread] INFO  [c.a.controller.LoginController] - Student session set for user ID: 8
+2026-03-25 20:52:52.049 [JavaFX Application Thread] INFO  [c.a.controller.LoginController] - User PotatoPeople8 logged in successfully with role: STUDENT
+2026-03-25 20:53:03.970 [JavaFX Application Thread] INFO  [c.a.controller.LoginController] - Login attempt for username: PotatoPeople8
+2026-03-25 20:53:03.975 [JavaFX Application Thread] INFO  [com.academic.util.ErrorHandler] - AUTH: LOGIN for user 'PotatoPeople8' - Success [Authentication successful]
+2026-03-25 20:53:03.977 [JavaFX Application Thread] INFO  [com.academic.util.ErrorHandler] - AUTH: LOGIN_SUCCESS for user 'PotatoPeople8' - Success [User role: STUDENT]
+2026-03-25 20:53:03.980 [JavaFX Application Thread] INFO  [c.a.controller.LoginController] - Student session set for user ID: 8
+2026-03-25 20:53:03.982 [JavaFX Application Thread] INFO  [c.a.controller.LoginController] - User PotatoPeople8 logged in successfully with role: STUDENT
+2026-03-25 20:53:05.172 [JavaFX Application Thread] INFO  [c.a.controller.LoginController] - Login attempt for username: PotatoPeople8
+2026-03-25 20:53:05.178 [JavaFX Application Thread] INFO  [com.academic.util.ErrorHandler] - AUTH: LOGIN for user 'PotatoPeople8' - Success [Authentication successful]
+2026-03-25 20:53:05.180 [JavaFX Application Thread] INFO  [com.academic.util.ErrorHandler] - AUTH: LOGIN_SUCCESS for user 'PotatoPeople8' - Success [User role: STUDENT]
+2026-03-25 20:53:05.184 [JavaFX Application Thread] INFO  [c.a.controller.LoginController] - Student session set for user ID: 8
+2026-03-25 20:53:05.186 [JavaFX Application Thread] INFO  [c.a.controller.LoginController] - User PotatoPeople8 logged in successfully with role: STUDENT
+2026-03-25 20:53:05.365 [JavaFX Application Thread] INFO  [c.a.controller.LoginController] - Login attempt for username: PotatoPeople8
+2026-03-25 20:53:05.370 [JavaFX Application Thread] INFO  [com.academic.util.ErrorHandler] - AUTH: LOGIN for user 'PotatoPeople8' - Success [Authentication successful]
+2026-03-25 20:53:05.371 [JavaFX Application Thread] INFO  [com.academic.util.ErrorHandler] - AUTH: LOGIN_SUCCESS for user 'PotatoPeople8' - Success [User role: STUDENT]
+2026-03-25 20:53:05.374 [JavaFX Application Thread] INFO  [c.a.controller.LoginController] - Student session set for user ID: 8
+2026-03-25 20:53:05.375 [JavaFX Application Thread] INFO  [c.a.controller.LoginController] - User PotatoPeople8 logged in successfully with role: STUDENT
+2026-03-25 20:53:05.580 [JavaFX Application Thread] INFO  [c.a.controller.LoginController] - Login attempt for username: PotatoPeople8
+2026-03-25 20:53:05.585 [JavaFX Application Thread] INFO  [com.academic.util.ErrorHandler] - AUTH: LOGIN for user 'PotatoPeople8' - Success [Authentication successful]
+2026-03-25 20:53:05.587 [JavaFX Application Thread] INFO  [com.academic.util.ErrorHandler] - AUTH: LOGIN_SUCCESS for user 'PotatoPeople8' - Success [User role: STUDENT]
+2026-03-25 20:53:05.590 [JavaFX Application Thread] INFO  [c.a.controller.LoginController] - Student session set for user ID: 8
+2026-03-25 20:53:05.592 [JavaFX Application Thread] INFO  [c.a.controller.LoginController] - User PotatoPeople8 logged in successfully with role: STUDENT
+2026-03-25 20:53:09.409 [JavaFX Application Thread] INFO  [c.a.controller.LoginController] - Login attempt for username: PotatoPeople8
+2026-03-25 20:53:09.409 [JavaFX Application Thread] INFO  [com.academic.util.ErrorHandler] - AUTH: LOGIN for user 'PotatoPeople8' - Success [Authentication successful]
+2026-03-25 20:53:09.409 [JavaFX Application Thread] INFO  [com.academic.util.ErrorHandler] - AUTH: LOGIN_SUCCESS for user 'PotatoPeople8' - Success [User role: STUDENT]
+2026-03-25 20:53:09.410 [JavaFX Application Thread] INFO  [c.a.controller.LoginController] - Student session set for user ID: 8
+2026-03-25 20:53:09.410 [JavaFX Application Thread] INFO  [c.a.controller.LoginController] - User PotatoPeople8 logged in successfully with role: STUDENT
+2026-03-25 20:53:15.708 [JavaFX Application Thread] INFO  [c.a.controller.LoginController] - Login attempt for username: PotatoPeople8
+2026-03-25 20:53:15.709 [JavaFX Application Thread] INFO  [com.academic.util.ErrorHandler] - AUTH: LOGIN for user 'PotatoPeople8' - Success [Authentication successful]
+2026-03-25 20:53:15.709 [JavaFX Application Thread] INFO  [com.academic.util.ErrorHandler] - AUTH: LOGIN_SUCCESS for user 'PotatoPeople8' - Success [User role: STUDENT]
+2026-03-25 20:53:15.709 [JavaFX Application Thread] INFO  [c.a.controller.LoginController] - Student session set for user ID: 8
+2026-03-25 20:53:15.709 [JavaFX Application Thread] INFO  [c.a.controller.LoginController] - User PotatoPeople8 logged in successfully with role: STUDENT
+2026-03-25 21:05:51.563 [JavaFX Application Thread] INFO  [com.academic.dao.DatabaseManager] - Initializing DatabaseManager with default URL: jdbc:sqlite:academic_system.db
+2026-03-25 21:05:51.706 [JavaFX Application Thread] INFO  [com.academic.dao.DatabaseManager] - Database connection established
+2026-03-25 21:05:51.708 [JavaFX Application Thread] DEBUG [com.academic.dao.DatabaseManager] - Starting database transaction
+2026-03-25 21:05:51.712 [JavaFX Application Thread] INFO  [com.academic.dao.DatabaseManager] - Current database schema version: 2
+2026-03-25 21:05:51.727 [JavaFX Application Thread] DEBUG [com.academic.dao.DatabaseManager] - Transaction committed successfully
+2026-03-25 21:05:51.727 [JavaFX Application Thread] INFO  [com.academic.dao.DatabaseManager] - Database schema initialized successfully
+2026-03-25 21:05:58.102 [JavaFX Application Thread] INFO  [c.a.controller.LoginController] - Login attempt for username: admin
+2026-03-25 21:05:58.109 [JavaFX Application Thread] INFO  [com.academic.util.ErrorHandler] - AUTH: LOGIN for user 'admin' - Success [Authentication successful]
+2026-03-25 21:05:58.110 [JavaFX Application Thread] INFO  [com.academic.util.ErrorHandler] - AUTH: LOGIN_SUCCESS for user 'admin' - Success [User role: ADMIN]
+2026-03-25 21:05:58.110 [JavaFX Application Thread] INFO  [c.a.controller.LoginController] - User admin logged in successfully with role: ADMIN
+2026-03-25 21:05:58.142 [JavaFX Application Thread] DEBUG [com.academic.util.TableUtil] - Column sorting enabled for table
+2026-03-25 21:05:58.157 [JavaFX Application Thread] DEBUG [com.academic.util.TableUtil] - Column sorting enabled for table
+2026-03-25 21:05:58.161 [JavaFX Application Thread] DEBUG [com.academic.util.TableUtil] - Column sorting enabled for table
+2026-03-25 21:05:58.165 [JavaFX Application Thread] DEBUG [com.academic.util.TableUtil] - Column sorting enabled for table
+2026-03-25 21:05:58.175 [JavaFX Application Thread] DEBUG [com.academic.util.TableUtil] - Column sorting enabled for table
+2026-03-25 21:06:10.539 [JavaFX Application Thread] DEBUG [com.academic.util.TableUtil] - Search cleared - showing all 6 items
+2026-03-25 21:06:13.311 [JavaFX Application Thread] DEBUG [com.academic.util.TableUtil] - Search cleared - showing all 6 items
+2026-03-25 21:06:14.095 [JavaFX Application Thread] DEBUG [com.academic.util.TableUtil] - Search performed: column='Last Name', text='w', results=2
+2026-03-25 21:06:15.532 [JavaFX Application Thread] DEBUG [com.academic.util.TableUtil] - Search cleared - showing all 6 items
+2026-03-25 21:06:19.918 [JavaFX Application Thread] DEBUG [com.academic.util.TableUtil] - Search cleared - showing all 6 items
+2026-03-25 21:06:19.918 [JavaFX Application Thread] DEBUG [com.academic.util.TableUtil] - Search filter cleared
+2026-03-25 21:09:15.632 [JavaFX Application Thread] DEBUG [com.academic.util.TableUtil] - Search performed: column='All Columns', text='j', results=3
+2026-03-25 21:09:15.935 [JavaFX Application Thread] DEBUG [com.academic.util.TableUtil] - Search performed: column='All Columns', text='ja', results=2
+2026-03-25 21:09:16.017 [JavaFX Application Thread] DEBUG [com.academic.util.TableUtil] - Search performed: column='All Columns', text='jam', results=2
+2026-03-25 21:22:56.357 [JavaFX Application Thread] INFO  [com.academic.dao.DatabaseManager] - Initializing DatabaseManager with default URL: jdbc:sqlite:academic_system.db
+2026-03-25 21:22:56.504 [JavaFX Application Thread] INFO  [com.academic.dao.DatabaseManager] - Database connection established
+2026-03-25 21:22:56.506 [JavaFX Application Thread] DEBUG [com.academic.dao.DatabaseManager] - Starting database transaction
+2026-03-25 21:22:56.511 [JavaFX Application Thread] INFO  [com.academic.dao.DatabaseManager] - Current database schema version: 2
+2026-03-25 21:22:56.520 [JavaFX Application Thread] DEBUG [com.academic.dao.DatabaseManager] - Transaction committed successfully
+2026-03-25 21:22:56.520 [JavaFX Application Thread] INFO  [com.academic.dao.DatabaseManager] - Database schema initialized successfully
+2026-03-25 21:23:04.958 [JavaFX Application Thread] INFO  [c.a.controller.LoginController] - Login attempt for username: admin
+2026-03-25 21:23:04.965 [JavaFX Application Thread] INFO  [com.academic.util.ErrorHandler] - AUTH: LOGIN for user 'admin' - Failed [Invalid credentials]
+2026-03-25 21:23:04.966 [JavaFX Application Thread] INFO  [com.academic.util.ErrorHandler] - AUTH: LOGIN_FAILED for user 'admin' - Failed [Invalid credentials provided]
+2026-03-25 21:23:04.966 [JavaFX Application Thread] WARN  [c.a.controller.LoginController] - Failed login attempt for username: admin
+2026-03-25 21:23:10.078 [JavaFX Application Thread] INFO  [c.a.controller.LoginController] - Login attempt for username: admin
+2026-03-25 21:23:10.081 [JavaFX Application Thread] INFO  [com.academic.util.ErrorHandler] - AUTH: LOGIN for user 'admin' - Success [Authentication successful]
+2026-03-25 21:23:10.082 [JavaFX Application Thread] INFO  [com.academic.util.ErrorHandler] - AUTH: LOGIN_SUCCESS for user 'admin' - Success [User role: ADMIN]
+2026-03-25 21:23:10.082 [JavaFX Application Thread] INFO  [c.a.controller.LoginController] - User admin logged in successfully with role: ADMIN
+2026-03-25 21:23:10.113 [JavaFX Application Thread] DEBUG [com.academic.util.TableUtil] - Column sorting enabled for table
+2026-03-25 21:23:10.134 [JavaFX Application Thread] DEBUG [com.academic.util.TableUtil] - Table filter/sort/paginate: column='All Columns', text='', sort='None Ascending', page=1/1, pageSize=25, results=6
+2026-03-25 21:23:10.142 [JavaFX Application Thread] DEBUG [com.academic.util.TableUtil] - Column sorting enabled for table
+2026-03-25 21:23:10.145 [JavaFX Application Thread] DEBUG [com.academic.util.TableUtil] - Table filter/sort/paginate: column='All Columns', text='', sort='None Ascending', page=1/1, pageSize=25, results=4
+2026-03-25 21:23:10.147 [JavaFX Application Thread] DEBUG [com.academic.util.TableUtil] - Column sorting enabled for table
+2026-03-25 21:23:10.150 [JavaFX Application Thread] DEBUG [com.academic.util.TableUtil] - Table filter/sort/paginate: column='All Columns', text='', sort='None Ascending', page=1/1, pageSize=25, results=5
+2026-03-25 21:23:10.152 [JavaFX Application Thread] DEBUG [com.academic.util.TableUtil] - Column sorting enabled for table
+2026-03-25 21:23:10.157 [JavaFX Application Thread] DEBUG [com.academic.util.TableUtil] - Table filter/sort/paginate: column='All Columns', text='', sort='None Ascending', page=1/1, pageSize=25, results=12
+2026-03-25 21:23:10.161 [JavaFX Application Thread] DEBUG [com.academic.util.TableUtil] - Column sorting enabled for table
+2026-03-25 21:23:10.165 [JavaFX Application Thread] DEBUG [com.academic.util.TableUtil] - Table filter/sort/paginate: column='All Columns', text='', sort='None Ascending', page=1/1, pageSize=25, results=5
+2026-03-25 21:23:17.165 [JavaFX Application Thread] DEBUG [com.academic.util.TableUtil] - Table filter/sort/paginate: column='All Columns', text='s', sort='None Ascending', page=1/1, pageSize=25, results=6
+2026-03-25 21:23:17.247 [JavaFX Application Thread] DEBUG [com.academic.util.TableUtil] - Table filter/sort/paginate: column='All Columns', text='sd', sort='None Ascending', page=1/1, pageSize=25, results=0
+2026-03-25 21:23:18.046 [JavaFX Application Thread] DEBUG [com.academic.util.TableUtil] - Table filter/sort/paginate: column='All Columns', text='s', sort='None Ascending', page=1/1, pageSize=25, results=6
+2026-03-25 21:23:18.225 [JavaFX Application Thread] DEBUG [com.academic.util.TableUtil] - Table filter/sort/paginate: column='All Columns', text='', sort='None Ascending', page=1/1, pageSize=25, results=6
+2026-03-25 21:23:18.350 [JavaFX Application Thread] DEBUG [com.academic.util.TableUtil] - Table filter/sort/paginate: column='All Columns', text='w', sort='None Ascending', page=1/1, pageSize=25, results=2
+2026-03-25 21:23:18.498 [JavaFX Application Thread] DEBUG [com.academic.util.TableUtil] - Table filter/sort/paginate: column='All Columns', text='wo', sort='None Ascending', page=1/1, pageSize=25, results=1
+2026-03-25 21:23:18.874 [JavaFX Application Thread] DEBUG [com.academic.util.TableUtil] - Table filter/sort/paginate: column='All Columns', text='won', sort='None Ascending', page=1/1, pageSize=25, results=1
+2026-03-25 21:23:19.065 [JavaFX Application Thread] DEBUG [com.academic.util.TableUtil] - Table filter/sort/paginate: column='All Columns', text='wong', sort='None Ascending', page=1/1, pageSize=25, results=1
+2026-03-25 21:23:19.194 [JavaFX Application Thread] DEBUG [com.academic.util.TableUtil] - Table filter/sort/paginate: column='All Columns', text='wong', sort='None Ascending', page=1/1, pageSize=25, results=1
+2026-03-25 21:23:19.482 [JavaFX Application Thread] DEBUG [com.academic.util.TableUtil] - Table filter/sort/paginate: column='All Columns', text='wong j', sort='None Ascending', page=1/1, pageSize=25, results=0
+2026-03-25 21:23:19.810 [JavaFX Application Thread] DEBUG [com.academic.util.TableUtil] - Table filter/sort/paginate: column='All Columns', text='wong', sort='None Ascending', page=1/1, pageSize=25, results=1
+2026-03-25 21:23:20.120 [JavaFX Application Thread] DEBUG [com.academic.util.TableUtil] - Table filter/sort/paginate: column='All Columns', text='wong', sort='None Ascending', page=1/1, pageSize=25, results=1
+2026-03-25 21:23:20.258 [JavaFX Application Thread] DEBUG [com.academic.util.TableUtil] - Table filter/sort/paginate: column='All Columns', text='won', sort='None Ascending', page=1/1, pageSize=25, results=1
+2026-03-25 21:23:20.415 [JavaFX Application Thread] DEBUG [com.academic.util.TableUtil] - Table filter/sort/paginate: column='All Columns', text='wo', sort='None Ascending', page=1/1, pageSize=25, results=1
+2026-03-25 21:23:20.575 [JavaFX Application Thread] DEBUG [com.academic.util.TableUtil] - Table filter/sort/paginate: column='All Columns', text='w', sort='None Ascending', page=1/1, pageSize=25, results=2
+2026-03-25 21:23:20.732 [JavaFX Application Thread] DEBUG [com.academic.util.TableUtil] - Table filter/sort/paginate: column='All Columns', text='', sort='None Ascending', page=1/1, pageSize=25, results=6
+2026-03-25 21:23:21.400 [JavaFX Application Thread] DEBUG [com.academic.util.TableUtil] - Table filter/sort/paginate: column='All Columns', text='d', sort='None Ascending', page=1/1, pageSize=25, results=2
+2026-03-25 21:23:21.522 [JavaFX Application Thread] DEBUG [com.academic.util.TableUtil] - Table filter/sort/paginate: column='All Columns', text='do', sort='None Ascending', page=1/1, pageSize=25, results=1
+2026-03-25 21:23:21.667 [JavaFX Application Thread] DEBUG [com.academic.util.TableUtil] - Table filter/sort/paginate: column='All Columns', text='doe', sort='None Ascending', page=1/1, pageSize=25, results=1
+2026-03-25 21:23:21.862 [JavaFX Application Thread] DEBUG [com.academic.util.TableUtil] - Table filter/sort/paginate: column='All Columns', text='doe', sort='None Ascending', page=1/1, pageSize=25, results=1
+2026-03-25 21:23:22.169 [JavaFX Application Thread] DEBUG [com.academic.util.TableUtil] - Table filter/sort/paginate: column='All Columns', text='doe', sort='None Ascending', page=1/1, pageSize=25, results=1
+2026-03-25 21:23:22.331 [JavaFX Application Thread] DEBUG [com.academic.util.TableUtil] - Table filter/sort/paginate: column='All Columns', text='do', sort='None Ascending', page=1/1, pageSize=25, results=1
+2026-03-25 21:23:22.465 [JavaFX Application Thread] DEBUG [com.academic.util.TableUtil] - Table filter/sort/paginate: column='All Columns', text='d', sort='None Ascending', page=1/1, pageSize=25, results=2
+2026-03-25 21:23:22.631 [JavaFX Application Thread] DEBUG [com.academic.util.TableUtil] - Table filter/sort/paginate: column='All Columns', text='', sort='None Ascending', page=1/1, pageSize=25, results=6
+2026-03-25 21:23:24.055 [JavaFX Application Thread] DEBUG [com.academic.util.TableUtil] - Table filter/sort/paginate: column='All Columns', text='j', sort='None Ascending', page=1/1, pageSize=25, results=2
+2026-03-25 21:23:24.230 [JavaFX Application Thread] DEBUG [com.academic.util.TableUtil] - Table filter/sort/paginate: column='All Columns', text='jo', sort='None Ascending', page=1/1, pageSize=25, results=1
+2026-03-25 21:23:24.601 [JavaFX Application Thread] DEBUG [com.academic.util.TableUtil] - Table filter/sort/paginate: column='All Columns', text='joh', sort='None Ascending', page=1/1, pageSize=25, results=1
+2026-03-25 21:23:24.805 [JavaFX Application Thread] DEBUG [com.academic.util.TableUtil] - Table filter/sort/paginate: column='All Columns', text='john', sort='None Ascending', page=1/1, pageSize=25, results=1
+2026-03-25 21:23:25.029 [JavaFX Application Thread] DEBUG [com.academic.util.TableUtil] - Table filter/sort/paginate: column='All Columns', text='joh', sort='None Ascending', page=1/1, pageSize=25, results=1
+2026-03-25 21:23:25.370 [JavaFX Application Thread] DEBUG [com.academic.util.TableUtil] - Table filter/sort/paginate: column='All Columns', text='jo', sort='None Ascending', page=1/1, pageSize=25, results=1
+2026-03-25 21:23:25.524 [JavaFX Application Thread] DEBUG [com.academic.util.TableUtil] - Table filter/sort/paginate: column='All Columns', text='j', sort='None Ascending', page=1/1, pageSize=25, results=2
+2026-03-25 21:23:25.680 [JavaFX Application Thread] DEBUG [com.academic.util.TableUtil] - Table filter/sort/paginate: column='All Columns', text='', sort='None Ascending', page=1/1, pageSize=25, results=6
+2026-03-25 21:23:27.616 [JavaFX Application Thread] DEBUG [com.academic.util.TableUtil] - Table filter/sort/paginate: column='All Columns', text='a', sort='None Ascending', page=1/1, pageSize=25, results=6
+2026-03-25 21:23:28.239 [JavaFX Application Thread] DEBUG [com.academic.util.TableUtil] - Table filter/sort/paginate: column='All Columns', text='', sort='None Ascending', page=1/1, pageSize=25, results=6
+2026-03-25 21:23:28.471 [JavaFX Application Thread] DEBUG [com.academic.util.TableUtil] - Table filter/sort/paginate: column='All Columns', text='d', sort='None Ascending', page=1/1, pageSize=25, results=2
+2026-03-25 21:23:29.410 [JavaFX Application Thread] DEBUG [com.academic.util.TableUtil] - Table filter/sort/paginate: column='All Columns', text='', sort='None Ascending', page=1/1, pageSize=25, results=6
+2026-03-25 21:23:29.548 [JavaFX Application Thread] DEBUG [com.academic.util.TableUtil] - Table filter/sort/paginate: column='All Columns', text='c', sort='None Ascending', page=1/1, pageSize=25, results=6
+2026-03-25 21:23:29.954 [JavaFX Application Thread] DEBUG [com.academic.util.TableUtil] - Table filter/sort/paginate: column='All Columns', text='', sort='None Ascending', page=1/1, pageSize=25, results=6
+2026-03-25 21:23:30.284 [JavaFX Application Thread] DEBUG [com.academic.util.TableUtil] - Table filter/sort/paginate: column='All Columns', text='q', sort='None Ascending', page=1/1, pageSize=25, results=0
+2026-03-25 21:23:30.849 [JavaFX Application Thread] DEBUG [com.academic.util.TableUtil] - Table filter/sort/paginate: column='All Columns', text='', sort='None Ascending', page=1/1, pageSize=25, results=6
+2026-03-25 21:23:31.043 [JavaFX Application Thread] DEBUG [com.academic.util.TableUtil] - Table filter/sort/paginate: column='All Columns', text='p', sort='None Ascending', page=1/1, pageSize=25, results=4
+2026-03-25 21:23:31.397 [JavaFX Application Thread] DEBUG [com.academic.util.TableUtil] - Table filter/sort/paginate: column='All Columns', text='', sort='None Ascending', page=1/1, pageSize=25, results=6
+2026-03-25 21:23:31.614 [JavaFX Application Thread] DEBUG [com.academic.util.TableUtil] - Table filter/sort/paginate: column='All Columns', text='o', sort='None Ascending', page=1/1, pageSize=25, results=6
+2026-03-25 21:23:32.053 [JavaFX Application Thread] DEBUG [com.academic.util.TableUtil] - Table filter/sort/paginate: column='All Columns', text='', sort='None Ascending', page=1/1, pageSize=25, results=6
+2026-03-25 21:23:32.194 [JavaFX Application Thread] DEBUG [com.academic.util.TableUtil] - Table filter/sort/paginate: column='All Columns', text='e', sort='None Ascending', page=1/1, pageSize=25, results=6
+2026-03-25 21:23:32.196 [JavaFX Application Thread] DEBUG [com.academic.util.TableUtil] - Table filter/sort/paginate: column='All Columns', text='ew', sort='None Ascending', page=1/1, pageSize=25, results=0
+2026-03-25 21:23:32.577 [JavaFX Application Thread] DEBUG [com.academic.util.TableUtil] - Table filter/sort/paginate: column='All Columns', text='e', sort='None Ascending', page=1/1, pageSize=25, results=6
+2026-03-25 21:23:32.928 [JavaFX Application Thread] DEBUG [com.academic.util.TableUtil] - Table filter/sort/paginate: column='All Columns', text='', sort='None Ascending', page=1/1, pageSize=25, results=6
+2026-03-25 21:23:33.067 [JavaFX Application Thread] DEBUG [com.academic.util.TableUtil] - Table filter/sort/paginate: column='All Columns', text='r', sort='None Ascending', page=1/1, pageSize=25, results=6
+2026-03-25 21:23:33.638 [JavaFX Application Thread] DEBUG [com.academic.util.TableUtil] - Table filter/sort/paginate: column='All Columns', text='', sort='None Ascending', page=1/1, pageSize=25, results=6
+2026-03-25 21:23:33.731 [JavaFX Application Thread] DEBUG [com.academic.util.TableUtil] - Table filter/sort/paginate: column='All Columns', text='t', sort='None Ascending', page=1/1, pageSize=25, results=6
+2026-03-25 21:23:35.338 [JavaFX Application Thread] DEBUG [com.academic.util.TableUtil] - Table filter/sort/paginate: column='All Columns', text='', sort='None Ascending', page=1/1, pageSize=25, results=6
+2026-03-25 21:23:35.985 [JavaFX Application Thread] DEBUG [com.academic.util.TableUtil] - Table filter/sort/paginate: column='All Columns', text='w', sort='None Ascending', page=1/1, pageSize=25, results=2
+2026-03-25 21:23:36.652 [JavaFX Application Thread] DEBUG [com.academic.util.TableUtil] - Table filter/sort/paginate: column='All Columns', text='', sort='None Ascending', page=1/1, pageSize=25, results=6
+2026-03-25 21:23:37.370 [JavaFX Application Thread] DEBUG [com.academic.util.TableUtil] - Table filter/sort/paginate: column='All Columns', text='t', sort='None Ascending', page=1/1, pageSize=25, results=6
+2026-03-25 21:23:38.537 [JavaFX Application Thread] DEBUG [com.academic.util.TableUtil] - Table filter/sort/paginate: column='All Columns', text='', sort='None Ascending', page=1/1, pageSize=25, results=6
+2026-03-25 21:23:38.661 [JavaFX Application Thread] DEBUG [com.academic.util.TableUtil] - Table filter/sort/paginate: column='All Columns', text='w', sort='None Ascending', page=1/1, pageSize=25, results=2

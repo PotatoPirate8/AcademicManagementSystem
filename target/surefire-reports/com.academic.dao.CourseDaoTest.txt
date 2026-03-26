@@ -1,4 +1,0 @@
--------------------------------------------------------------------------------
-Test set: com.academic.dao.CourseDaoTest
--------------------------------------------------------------------------------
-Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.655 s -- in com.academic.dao.CourseDaoTest

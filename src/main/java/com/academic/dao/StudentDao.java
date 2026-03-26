@@ -19,9 +19,19 @@ public class StudentDao {
 
     /** Creates a new student record and returns the generated ID */
     public int create(Student student) {
+        try {
+            return create(student, dbManager.getConnection());
+        } catch (SQLException e) {
+            System.err.println("Error creating student: " + e.getMessage());
+            return -1;
+        }
+    }
+
+    /** Creates a new student record and returns the generated ID using the provided connection. */
+    public int create(Student student, Connection conn) {
         String sql = "INSERT INTO students (user_id, first_name, last_name, email, student_number, programme) " +
                      "VALUES (?, ?, ?, ?, ?, ?)";
-        try (PreparedStatement stmt = dbManager.getConnection().prepareStatement(sql)) {
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, student.getUserId());
             stmt.setString(2, student.getFirstName());
             stmt.setString(3, student.getLastName());
@@ -29,7 +39,7 @@ public class StudentDao {
             stmt.setString(5, student.getStudentNumber());
             stmt.setString(6, student.getProgramme());
             stmt.executeUpdate();
-            try (ResultSet keys = dbManager.getConnection().createStatement()
+            try (ResultSet keys = conn.createStatement()
                     .executeQuery("SELECT last_insert_rowid()")) {
                 if (keys.next()) {
                     return keys.getInt(1);
@@ -106,8 +116,18 @@ public class StudentDao {
 
     /** Deletes a student by ID */
     public boolean delete(int id) {
+        try {
+            return delete(id, dbManager.getConnection());
+        } catch (SQLException e) {
+            System.err.println("Error deleting student: " + e.getMessage());
+            return false;
+        }
+    }
+
+    /** Deletes a student by ID using the provided connection. */
+    public boolean delete(int id, Connection conn) {
         String sql = "DELETE FROM students WHERE id = ?";
-        try (PreparedStatement stmt = dbManager.getConnection().prepareStatement(sql)) {
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, id);
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {

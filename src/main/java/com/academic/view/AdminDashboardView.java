@@ -15,8 +15,11 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.*;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import javafx.util.StringConverter;
 
@@ -31,6 +34,8 @@ import javafx.util.StringConverter;
  */
 public class AdminDashboardView {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(AdminDashboardView.class);
+
     private final Stage stage;
     private final BorderPane root;
     private final AdminController controller;
@@ -41,6 +46,13 @@ public class AdminDashboardView {
     private TableView<Course> coursesTable;
     private TableView<Enrollment> enrollmentsTable;
     private TableView<Grade> gradesTable;
+
+    // Backup data for filtering
+    private List<Student> allStudents;
+    private List<Lecturer> allLecturers;
+    private List<Course> allCourses;
+    private List<Enrollment> allEnrollments;
+    private List<Grade> allGrades;
 
     public AdminDashboardView(Stage stage) {
         this.stage = stage;
@@ -96,8 +108,8 @@ public class AdminDashboardView {
 
     private Tab createStudentsTab() {
         Tab tab = new Tab("Students");
-        VBox content = new VBox(10);
-        content.setPadding(new Insets(10));
+        VBox content = new VBox(0);
+        content.setPadding(new Insets(0));
 
         studentsTable = new TableView<>();
         studentsTable.setPlaceholder(new Label("No students found."));
@@ -127,6 +139,25 @@ public class AdminDashboardView {
         progCol.setPrefWidth(150);
 
         studentsTable.getColumns().addAll(idCol, numCol, fnCol, lnCol, emailCol, progCol);
+
+        // Enable sorting
+        TableUtil.enableColumnSorting(studentsTable);
+
+        // Refresh data and create search panel
+        refreshStudents();
+        
+        List<TableUtil.FilterableColumn<Student>> filterColumns = new ArrayList<>();
+        filterColumns.add(new TableUtil.FilterableColumn<>("Student No.", Student::getStudentNumber));
+        filterColumns.add(new TableUtil.FilterableColumn<>("First Name", Student::getFirstName));
+        filterColumns.add(new TableUtil.FilterableColumn<>("Last Name", Student::getLastName));
+        filterColumns.add(new TableUtil.FilterableColumn<>("Email", Student::getEmail));
+        filterColumns.add(new TableUtil.FilterableColumn<>("Programme", Student::getProgramme));
+        
+        VBox searchPanel = TableUtil.createSearchPanel(
+            studentsTable,
+            () -> allStudents != null ? allStudents : List.of(),
+            filterColumns
+        );
 
         // Edit form
         GridPane form = new GridPane();
@@ -233,16 +264,17 @@ public class AdminDashboardView {
         });
 
         buttons.getChildren().addAll(addBtn, updateBtn, deleteBtn, clearBtn);
-        refreshStudents();
+        buttons.setPadding(new Insets(10));
 
-        content.getChildren().addAll(studentsTable, form, buttons);
+        content.getChildren().addAll(searchPanel, studentsTable, form, buttons);
         VBox.setVgrow(studentsTable, Priority.ALWAYS);
         tab.setContent(content);
         return tab;
     }
 
     private void refreshStudents() {
-        studentsTable.setItems(FXCollections.observableArrayList(controller.getAllStudents()));
+        allStudents = controller.getAllStudents();
+        studentsTable.setItems(FXCollections.observableArrayList(allStudents));
     }
 
     // ==================== Lecturers Tab ====================
@@ -250,7 +282,7 @@ public class AdminDashboardView {
     private Tab createLecturersTab() {
         Tab tab = new Tab("Lecturers");
         VBox content = new VBox(10);
-        content.setPadding(new Insets(10));
+        content.setPadding(new Insets(0));
 
         lecturersTable = new TableView<>();
         lecturersTable.setPlaceholder(new Label("No lecturers found."));
@@ -276,6 +308,24 @@ public class AdminDashboardView {
         deptCol.setPrefWidth(150);
 
         lecturersTable.getColumns().addAll(idCol, fnCol, lnCol, emailCol, deptCol);
+
+    // Enable sorting
+    TableUtil.enableColumnSorting(lecturersTable);
+
+    // Refresh data and create search panel
+    refreshLecturers();
+        
+    List<TableUtil.FilterableColumn<Lecturer>> filterColumns = new ArrayList<>();
+    filterColumns.add(new TableUtil.FilterableColumn<>("First Name", Lecturer::getFirstName));
+    filterColumns.add(new TableUtil.FilterableColumn<>("Last Name", Lecturer::getLastName));
+    filterColumns.add(new TableUtil.FilterableColumn<>("Email", Lecturer::getEmail));
+    filterColumns.add(new TableUtil.FilterableColumn<>("Department", Lecturer::getDepartment));
+        
+    VBox searchPanel = TableUtil.createSearchPanel(
+        lecturersTable,
+        () -> allLecturers != null ? allLecturers : List.of(),
+        filterColumns
+    );
 
         // Form
         GridPane form = new GridPane();
@@ -363,16 +413,17 @@ public class AdminDashboardView {
         });
 
         buttons.getChildren().addAll(addBtn, updateBtn, deleteBtn, clearBtn);
-        refreshLecturers();
+        buttons.setPadding(new Insets(10));
 
-        content.getChildren().addAll(lecturersTable, form, buttons);
+        content.getChildren().addAll(searchPanel, lecturersTable, form, buttons);
         VBox.setVgrow(lecturersTable, Priority.ALWAYS);
         tab.setContent(content);
         return tab;
     }
 
     private void refreshLecturers() {
-        lecturersTable.setItems(FXCollections.observableArrayList(controller.getAllLecturers()));
+        allLecturers = controller.getAllLecturers();
+        lecturersTable.setItems(FXCollections.observableArrayList(allLecturers));
     }
 
     // ==================== Courses Tab ====================
@@ -380,7 +431,7 @@ public class AdminDashboardView {
     private Tab createCoursesTab() {
         Tab tab = new Tab("Courses");
         VBox content = new VBox(10);
-        content.setPadding(new Insets(10));
+        content.setPadding(new Insets(0));
 
         coursesTable = new TableView<>();
         coursesTable.setPlaceholder(new Label("No courses found."));
@@ -410,6 +461,24 @@ public class AdminDashboardView {
         capCol.setPrefWidth(80);
 
         coursesTable.getColumns().addAll(idCol, codeCol, nameCol, credCol, lecCol, capCol);
+
+    // Enable sorting
+    TableUtil.enableColumnSorting(coursesTable);
+
+    // Refresh data and create search panel
+    refreshCourses();
+        
+    List<TableUtil.FilterableColumn<Course>> filterColumns = new ArrayList<>();
+    filterColumns.add(new TableUtil.FilterableColumn<>("Course Code", Course::getCourseCode));
+    filterColumns.add(new TableUtil.FilterableColumn<>("Course Name", Course::getCourseName));
+    filterColumns.add(new TableUtil.FilterableColumn<>("Lecturer", Course::getLecturerName));
+    filterColumns.add(new TableUtil.FilterableColumn<>("Credits", course -> String.valueOf(course.getCredits())));
+        
+    VBox searchPanel = TableUtil.createSearchPanel(
+        coursesTable,
+        () -> allCourses != null ? allCourses : List.of(),
+        filterColumns
+    );
 
         // Form
         GridPane form = new GridPane();
@@ -506,9 +575,9 @@ public class AdminDashboardView {
         clearBtn.setOnAction(e -> clearCourseForm(codeField, nameField, creditsField, capacityField, lecturerCombo));
 
         buttons.getChildren().addAll(addBtn, updateBtn, deleteBtn, clearBtn);
-        refreshCourses();
+        buttons.setPadding(new Insets(10));
 
-        content.getChildren().addAll(coursesTable, form, buttons);
+        content.getChildren().addAll(searchPanel, coursesTable, form, buttons);
         VBox.setVgrow(coursesTable, Priority.ALWAYS);
         tab.setContent(content);
         return tab;
@@ -522,7 +591,8 @@ public class AdminDashboardView {
     }
 
     private void refreshCourses() {
-        coursesTable.setItems(FXCollections.observableArrayList(controller.getAllCourses()));
+        allCourses = controller.getAllCourses();
+        coursesTable.setItems(FXCollections.observableArrayList(allCourses));
     }
 
     // ==================== Enrollments Tab ====================
@@ -530,7 +600,7 @@ public class AdminDashboardView {
     private Tab createEnrollmentsTab() {
         Tab tab = new Tab("Enrollments");
         VBox content = new VBox(10);
-        content.setPadding(new Insets(10));
+        content.setPadding(new Insets(0));
 
         enrollmentsTable = new TableView<>();
         enrollmentsTable.setPlaceholder(new Label("No enrollments found."));
@@ -560,6 +630,23 @@ public class AdminDashboardView {
         statusCol.setPrefWidth(100);
 
         enrollmentsTable.getColumns().addAll(idCol, studentCol, codeCol, courseCol, dateCol, statusCol);
+
+    // Enable sorting and prepare search panel
+    TableUtil.enableColumnSorting(enrollmentsTable);
+        
+    refreshEnrollments();
+        
+    List<TableUtil.FilterableColumn<Enrollment>> filterColumns = new ArrayList<>();
+    filterColumns.add(new TableUtil.FilterableColumn<>("Student", Enrollment::getStudentName));
+    filterColumns.add(new TableUtil.FilterableColumn<>("Course Code", Enrollment::getCourseCode));
+    filterColumns.add(new TableUtil.FilterableColumn<>("Course Name", Enrollment::getCourseName));
+    filterColumns.add(new TableUtil.FilterableColumn<>("Status", e -> e.getStatus().name()));
+        
+    VBox searchPanel = TableUtil.createSearchPanel(
+        enrollmentsTable,
+        () -> allEnrollments != null ? allEnrollments : List.of(),
+        filterColumns
+    );
 
         // Form for adding/updating enrollments
         GridPane form = new GridPane();
@@ -767,16 +854,17 @@ public class AdminDashboardView {
         });
 
         buttons.getChildren().addAll(addBtn, updateStatusBtn, deleteBtn, clearBtn);
-        refreshEnrollments();
+        buttons.setPadding(new Insets(10));
 
-        content.getChildren().addAll(enrollmentsTable, form, buttons);
+        content.getChildren().addAll(searchPanel, enrollmentsTable, form, buttons);
         VBox.setVgrow(enrollmentsTable, Priority.ALWAYS);
         tab.setContent(content);
         return tab;
     }
 
     private void refreshEnrollments() {
-        enrollmentsTable.setItems(FXCollections.observableArrayList(controller.getAllEnrollments()));
+        allEnrollments = controller.getAllEnrollments();
+        enrollmentsTable.setItems(FXCollections.observableArrayList(allEnrollments));
     }
 
     // ==================== Grades Tab ====================
@@ -784,7 +872,7 @@ public class AdminDashboardView {
     private Tab createGradesTab() {
         Tab tab = new Tab("Grades");
         VBox content = new VBox(10);
-        content.setPadding(new Insets(10));
+        content.setPadding(new Insets(0));
 
         gradesTable = new TableView<>();
         gradesTable.setPlaceholder(new Label("No grades found."));
@@ -818,6 +906,23 @@ public class AdminDashboardView {
         dateCol.setPrefWidth(100);
 
         gradesTable.getColumns().addAll(idCol, studentCol, codeCol, valueCol, letterCol, feedbackCol, dateCol);
+
+    // Enable sorting and prepare search panel
+    TableUtil.enableColumnSorting(gradesTable);
+        
+    refreshGrades();
+        
+    List<TableUtil.FilterableColumn<Grade>> filterColumns = new ArrayList<>();
+    filterColumns.add(new TableUtil.FilterableColumn<>("Student", Grade::getStudentName));
+    filterColumns.add(new TableUtil.FilterableColumn<>("Course", Grade::getCourseCode));
+    filterColumns.add(new TableUtil.FilterableColumn<>("Letter Grade", Grade::getGradeLetter));
+    filterColumns.add(new TableUtil.FilterableColumn<>("Grade (%)", grade -> String.valueOf(grade.getGradeValue())));
+        
+    VBox searchPanel = TableUtil.createSearchPanel(
+        gradesTable,
+        () -> allGrades != null ? allGrades : List.of(),
+        filterColumns
+    );
 
         // Form for grade assignment
         GridPane form = new GridPane();
@@ -902,9 +1007,9 @@ public class AdminDashboardView {
         clearBtn.setOnAction(e -> clearGradeForm(gradeField, feedbackArea, enrollmentCombo));
 
         buttons.getChildren().addAll(addBtn, updateBtn, deleteBtn, clearBtn);
-        refreshGrades();
+        buttons.setPadding(new Insets(10));
 
-        content.getChildren().addAll(gradesTable, form, buttons);
+        content.getChildren().addAll(searchPanel, gradesTable, form, buttons);
         VBox.setVgrow(gradesTable, Priority.ALWAYS);
         tab.setContent(content);
         return tab;
@@ -919,7 +1024,8 @@ public class AdminDashboardView {
     }
 
     private void refreshGrades() {
-        gradesTable.setItems(FXCollections.observableArrayList(controller.getAllGrades()));
+        allGrades = controller.getAllGrades();
+        gradesTable.setItems(FXCollections.observableArrayList(allGrades));
     }
 
     // ==================== Reports Tab ====================

@@ -15,8 +15,12 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.*;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Student dashboard view with tabs for:
@@ -27,6 +31,8 @@ import java.time.LocalDate;
  */
 public class StudentDashboardView {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(StudentDashboardView.class);
+
     private final Stage stage;
     private final BorderPane root;
     private final StudentController controller;
@@ -36,6 +42,11 @@ public class StudentDashboardView {
     private TableView<Enrollment> myCoursesTable;
     private TableView<Course> availableCoursesTable;
     private TableView<Grade> gradesTable;
+    
+    // Backup data for filtering
+    private List<Enrollment> allEnrollments;
+    private List<Course> allCourses;
+    private List<Grade> allGrades;
 
     public StudentDashboardView(Stage stage) {
         this.stage = stage;
@@ -93,8 +104,8 @@ public class StudentDashboardView {
     /** Creates the tab showing currently enrolled courses */
     private Tab createMyCoursesTab() {
         Tab tab = new Tab("My Courses");
-        VBox content = new VBox(10);
-        content.setPadding(new Insets(15));
+        VBox content = new VBox(0);
+        content.setPadding(new Insets(0));
 
         myCoursesTable = new TableView<>();
         myCoursesTable.setPlaceholder(new Label("You are not enrolled in any courses."));
@@ -117,7 +128,25 @@ public class StudentDashboardView {
 
         myCoursesTable.getColumns().addAll(codeCol, nameCol, dateCol, statusCol);
 
+        // Enable sorting
+        TableUtil.enableColumnSorting(myCoursesTable);
+
+        // Refresh data and create search panel
+        refreshMyCourses();
+        
+        List<TableUtil.FilterableColumn<Enrollment>> filterColumns = new ArrayList<>();
+        filterColumns.add(new TableUtil.FilterableColumn<>("Course Code", e -> e.getCourseCode()));
+        filterColumns.add(new TableUtil.FilterableColumn<>("Course Name", e -> e.getCourseName()));
+        filterColumns.add(new TableUtil.FilterableColumn<>("Status", e -> e.getStatus().name()));
+        
+        VBox searchPanel = TableUtil.createSearchPanel(
+            myCoursesTable,
+            () -> allEnrollments != null ? allEnrollments : List.of(),
+            filterColumns
+        );
+
         HBox buttonBar = new HBox(10);
+        buttonBar.setPadding(new Insets(10, 15, 10, 15));
 
         Button withdrawButton = new Button("Withdraw from Selected Course");
         withdrawButton.getStyleClass().add("danger-button");
@@ -129,9 +158,7 @@ public class StudentDashboardView {
 
         buttonBar.getChildren().addAll(withdrawButton, deleteButton);
 
-        refreshMyCourses();
-
-        content.getChildren().addAll(myCoursesTable, buttonBar);
+        content.getChildren().addAll(searchPanel, myCoursesTable, buttonBar);
         VBox.setVgrow(myCoursesTable, Priority.ALWAYS);
         tab.setContent(content);
         return tab;
@@ -142,8 +169,8 @@ public class StudentDashboardView {
     /** Creates the tab for browsing and enrolling in courses */
     private Tab createAvailableCoursesTab() {
         Tab tab = new Tab("Available Courses");
-        VBox content = new VBox(10);
-        content.setPadding(new Insets(15));
+        VBox content = new VBox(0);
+        content.setPadding(new Insets(0));
 
         availableCoursesTable = new TableView<>();
         availableCoursesTable.setPlaceholder(new Label("No courses available."));
@@ -170,13 +197,33 @@ public class StudentDashboardView {
 
         availableCoursesTable.getColumns().addAll(codeCol, nameCol, creditsCol, lecturerCol, capacityCol);
 
+        // Enable sorting
+        TableUtil.enableColumnSorting(availableCoursesTable);
+
+        // Refresh data and create search panel
+        refreshAvailableCourses();
+        
+        List<TableUtil.FilterableColumn<Course>> filterColumns = new ArrayList<>();
+        filterColumns.add(new TableUtil.FilterableColumn<>("Code", Course::getCourseCode));
+        filterColumns.add(new TableUtil.FilterableColumn<>("Course Name", Course::getCourseName));
+        filterColumns.add(new TableUtil.FilterableColumn<>("Lecturer", Course::getLecturerName));
+        
+        VBox searchPanel = TableUtil.createSearchPanel(
+            availableCoursesTable,
+            () -> allCourses != null ? allCourses : List.of(),
+            filterColumns
+        );
+
+        HBox buttonBar = new HBox(10);
+        buttonBar.setPadding(new Insets(10, 15, 10, 15));
+
         Button enrollButton = new Button("Enroll in Selected Course");
         enrollButton.getStyleClass().add("primary-button");
         enrollButton.setOnAction(e -> handleEnroll());
 
-        refreshAvailableCourses();
+        buttonBar.getChildren().addAll(enrollButton);
 
-        content.getChildren().addAll(availableCoursesTable, enrollButton);
+        content.getChildren().addAll(searchPanel, availableCoursesTable, buttonBar);
         VBox.setVgrow(availableCoursesTable, Priority.ALWAYS);
         tab.setContent(content);
         return tab;
@@ -187,8 +234,8 @@ public class StudentDashboardView {
     /** Creates the tab for viewing grades */
     private Tab createGradesTab() {
         Tab tab = new Tab("My Grades");
-        VBox content = new VBox(10);
-        content.setPadding(new Insets(15));
+        VBox content = new VBox(0);
+        content.setPadding(new Insets(0));
 
         gradesTable = new TableView<>();
         gradesTable.setPlaceholder(new Label("No grades available yet."));
@@ -219,9 +266,24 @@ public class StudentDashboardView {
 
         gradesTable.getColumns().addAll(codeCol, nameCol, valueCol, letterCol, feedbackCol, dateCol);
 
-        refreshGrades();
+        // Enable sorting
+        TableUtil.enableColumnSorting(gradesTable);
 
-        content.getChildren().addAll(gradesTable);
+        // Refresh data and create search panel
+        refreshGrades();
+        
+        List<TableUtil.FilterableColumn<Grade>> filterColumns = new ArrayList<>();
+        filterColumns.add(new TableUtil.FilterableColumn<>("Course Code", Grade::getCourseCode));
+        filterColumns.add(new TableUtil.FilterableColumn<>("Course Name", Grade::getCourseName));
+        filterColumns.add(new TableUtil.FilterableColumn<>("Letter", Grade::getGradeLetter));
+        
+        VBox searchPanel = TableUtil.createSearchPanel(
+            gradesTable,
+            () -> allGrades != null ? allGrades : List.of(),
+            filterColumns
+        );
+
+        content.getChildren().addAll(searchPanel, gradesTable);
         VBox.setVgrow(gradesTable, Priority.ALWAYS);
         tab.setContent(content);
         return tab;
@@ -289,23 +351,25 @@ public class StudentDashboardView {
 
     private void refreshMyCourses() {
         if (currentStudent == null) return;
-        ObservableList<Enrollment> enrollments = FXCollections.observableArrayList(
-            controller.getMyEnrollments(currentStudent.getId())
-        );
+        allEnrollments = controller.getMyEnrollments(currentStudent.getId());
+        ObservableList<Enrollment> enrollments = FXCollections.observableArrayList(allEnrollments);
         myCoursesTable.setItems(enrollments);
+        LOGGER.debug("Refreshed My Courses: {} enrollments", allEnrollments.size());
     }
 
     private void refreshAvailableCourses() {
-        ObservableList<Course> courses = FXCollections.observableArrayList(controller.getAllCourses());
+        allCourses = controller.getAllCourses();
+        ObservableList<Course> courses = FXCollections.observableArrayList(allCourses);
         availableCoursesTable.setItems(courses);
+        LOGGER.debug("Refreshed Available Courses: {} courses", allCourses.size());
     }
 
     private void refreshGrades() {
         if (currentStudent == null) return;
-        ObservableList<Grade> grades = FXCollections.observableArrayList(
-            controller.getMyGrades(currentStudent.getId())
-        );
+        allGrades = controller.getMyGrades(currentStudent.getId());
+        ObservableList<Grade> grades = FXCollections.observableArrayList(allGrades);
         gradesTable.setItems(grades);
+        LOGGER.debug("Refreshed Grades: {} grades", allGrades.size());
     }
 
     // ==================== Event Handlers ====================

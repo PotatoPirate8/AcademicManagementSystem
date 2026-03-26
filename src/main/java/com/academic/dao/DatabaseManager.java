@@ -2,9 +2,14 @@ package com.academic.dao;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Manages the SQLite database connection and schema initialization.
@@ -12,11 +17,22 @@ import java.sql.Statement;
  */
 public class DatabaseManager {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseManager.class);
     private static final String DEFAULT_DB_URL = "jdbc:sqlite:academic_system.db";
     private static final String DB_URL = resolveDatabaseUrl();
     private static DatabaseManager instance;
     private Connection connection;
     private final boolean shouldSeedDummyData;
+
+    @FunctionalInterface
+    public interface SqlWork<T> {
+        T execute(Connection connection) throws SQLException;
+    }
+
+    @FunctionalInterface
+    public interface SqlVoidWork {
+        void execute(Connection connection) throws SQLException;
+    }
 
     private static String resolveDatabaseUrl() {
         String envUrl = System.getenv("ACADEMIC_DB_URL");
@@ -33,10 +49,14 @@ public class DatabaseManager {
     /** Private constructor for default production database */
     private DatabaseManager() {
         try {
+            LOGGER.info("Initializing DatabaseManager with default URL: {}", DB_URL);
             shouldSeedDummyData = true;
             connection = DriverManager.getConnection(DB_URL);
+            LOGGER.info("Database connection established");
             initializeSchema();
+            LOGGER.info("Database schema initialized successfully");
         } catch (SQLException e) {
+            LOGGER.error("Failed to initialize database: {}", e.getMessage(), e);
             throw new RuntimeException("Failed to initialize database: " + e.getMessage(), e);
         }
     }
@@ -44,10 +64,14 @@ public class DatabaseManager {
     /** Private constructor with custom URL (used for testing) */
     private DatabaseManager(String url) {
         try {
+            LOGGER.info("Initializing DatabaseManager with custom URL: {}", url);
             shouldSeedDummyData = DB_URL.equals(url);
             connection = DriverManager.getConnection(url);
+            LOGGER.info("Database connection established (test mode)");
             initializeSchema();
+            LOGGER.info("Database schema initialized successfully (test mode)");
         } catch (SQLException e) {
+            LOGGER.error("Failed to initialize database: {}", e.getMessage(), e);
             throw new RuntimeException("Failed to initialize database: " + e.getMessage(), e);
         }
     }
@@ -64,8 +88,44 @@ public class DatabaseManager {
     public Connection getConnection() throws SQLException {
         if (connection == null || connection.isClosed()) {
             connection = DriverManager.getConnection(DB_URL);
+            configureConnection(connection);
         }
         return connection;
+    }
+
+    /** Executes a unit of work inside a database transaction. */
+    public synchronized <T> T executeInTransaction(SqlWork<T> work) throws SQLException {
+        Connection conn = getConnection();
+        boolean originalAutoCommit = conn.getAutoCommit();
+        try {
+            LOGGER.debug("Starting database transaction");
+            if (originalAutoCommit) {
+                conn.setAutoCommit(false);
+            }
+            T result = work.execute(conn);
+            conn.commit();
+            LOGGER.debug("Transaction committed successfully");
+            return result;
+        } catch (SQLException e) {
+            LOGGER.error("Transaction failed, rolling back: {}", e.getMessage(), e);
+            conn.rollback();
+            throw e;
+        } catch (RuntimeException e) {
+            LOGGER.error("Unexpected error during transaction, rolling back: {}", e.getMessage(), e);
+            conn.rollback();
+            throw e;
+        } finally {
+            if (originalAutoCommit) {
+                conn.setAutoCommit(true);
+            }
+        }
+    }
+
+    private void configureConnection(Connection conn) throws SQLException {
+        try (Statement stmt = conn.createStatement()) {
+            stmt.execute("PRAGMA foreign_keys = ON");
+            stmt.execute("PRAGMA busy_timeout = 5000");
+        }
     }
 
     /**
@@ -73,8 +133,67 @@ public class DatabaseManager {
      * Also inserts a default admin account for first-time setup.
      */
     private void initializeSchema() throws SQLException {
-        try (Statement stmt = connection.createStatement()) {
-            // Users table for authentication
+        configureConnection(connection);
+        executeInTransaction(conn -> {
+            ensureMigrationsTable(conn);
+            applyPendingMigrations(conn);
+            seedInitialData(conn);
+            return null;
+        });
+    }
+
+    private void ensureMigrationsTable(Connection conn) throws SQLException {
+        try (Statement stmt = conn.createStatement()) {
+            stmt.execute("""
+                CREATE TABLE IF NOT EXISTS schema_migrations (
+                    version INTEGER PRIMARY KEY,
+                    description TEXT NOT NULL,
+                    applied_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+                )
+            """);
+        }
+    }
+
+    private void applyPendingMigrations(Connection conn) throws SQLException {
+        int currentVersion = getCurrentSchemaVersion(conn);
+        LOGGER.info("Current database schema version: {}", currentVersion);
+        for (Migration migration : getMigrations()) {
+            if (migration.version() > currentVersion) {
+                LOGGER.info("Applying migration v{}: {}", migration.version(), migration.description());
+                migration.run(conn);
+                recordMigration(conn, migration);
+                LOGGER.info("Migration v{} completed successfully", migration.version());
+            }
+        }
+    }
+
+    private int getCurrentSchemaVersion(Connection conn) throws SQLException {
+        String sql = "SELECT COALESCE(MAX(version), 0) FROM schema_migrations";
+        try (Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            rs.next();
+            return rs.getInt(1);
+        }
+    }
+
+    private List<Migration> getMigrations() {
+        List<Migration> migrations = new ArrayList<>();
+        migrations.add(new Migration(1, "Create core tables", this::migrationV1CreateCoreTables));
+        migrations.add(new Migration(2, "Add reliability indexes", this::migrationV2AddIndexes));
+        return migrations;
+    }
+
+    private void recordMigration(Connection conn, Migration migration) throws SQLException {
+        String sql = "INSERT INTO schema_migrations (version, description) VALUES (?, ?)";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, migration.version());
+            stmt.setString(2, migration.description());
+            stmt.executeUpdate();
+        }
+    }
+
+    private void migrationV1CreateCoreTables(Connection conn) throws SQLException {
+        try (Statement stmt = conn.createStatement()) {
             stmt.execute("""
                 CREATE TABLE IF NOT EXISTS users (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -84,7 +203,6 @@ public class DatabaseManager {
                 )
             """);
 
-            // Students table linked to user accounts
             stmt.execute("""
                 CREATE TABLE IF NOT EXISTS students (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -98,7 +216,6 @@ public class DatabaseManager {
                 )
             """);
 
-            // Lecturers table
             stmt.execute("""
                 CREATE TABLE IF NOT EXISTS lecturers (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -109,7 +226,6 @@ public class DatabaseManager {
                 )
             """);
 
-            // Courses table with lecturer assignment
             stmt.execute("""
                 CREATE TABLE IF NOT EXISTS courses (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -122,7 +238,6 @@ public class DatabaseManager {
                 )
             """);
 
-            // Enrollments table linking students to courses
             stmt.execute("""
                 CREATE TABLE IF NOT EXISTS enrollments (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -137,7 +252,6 @@ public class DatabaseManager {
                 )
             """);
 
-            // Grades table linked to enrollments
             stmt.execute("""
                 CREATE TABLE IF NOT EXISTS grades (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -149,7 +263,21 @@ public class DatabaseManager {
                     FOREIGN KEY (enrollment_id) REFERENCES enrollments(id)
                 )
             """);
+        }
+    }
 
+    private void migrationV2AddIndexes(Connection conn) throws SQLException {
+        try (Statement stmt = conn.createStatement()) {
+            stmt.execute("CREATE INDEX IF NOT EXISTS idx_students_user_id ON students(user_id)");
+            stmt.execute("CREATE INDEX IF NOT EXISTS idx_enrollments_student_status ON enrollments(student_id, status)");
+            stmt.execute("CREATE INDEX IF NOT EXISTS idx_enrollments_course_id ON enrollments(course_id)");
+            stmt.execute("CREATE INDEX IF NOT EXISTS idx_grades_enrollment_id ON grades(enrollment_id)");
+            stmt.execute("CREATE INDEX IF NOT EXISTS idx_grades_graded_date ON grades(graded_date)");
+        }
+    }
+
+    private void seedInitialData(Connection conn) throws SQLException {
+        try (Statement stmt = conn.createStatement()) {
             // Insert default admin account (password: admin123)
             stmt.execute("""
                 INSERT OR IGNORE INTO users (username, password_hash, role)
@@ -164,6 +292,12 @@ public class DatabaseManager {
                     seedDummyData(stmt);
                 }
             }
+        }
+    }
+
+    private record Migration(int version, String description, SqlVoidWork action) {
+        void run(Connection conn) throws SQLException {
+            action.execute(conn);
         }
     }
 
@@ -196,7 +330,7 @@ public class DatabaseManager {
             (6, 'Dev', 'Patel', 'dp5e25@soton.ac.uk', 'DP2025', 'MEng Computer Science')
         """);
 
-        // Courses
+        // Courses (with lecturer_id 1-4)
         stmt.execute("""
             INSERT INTO courses (course_code, course_name, credits, lecturer_id, max_capacity) VALUES
             ('COMP1322', 'Computational Thinking', 15, 1, 120),
@@ -206,7 +340,7 @@ public class DatabaseManager {
             ('ELEC1201', 'Digital Systems', 15, 4, 90)
         """);
 
-        // Enrollments
+        // Enrollments (student_id 1-5 maps to actual student record IDs, course_id 1-5 maps to actual course record IDs)
         stmt.execute("""
             INSERT INTO enrollments (student_id, course_id, enrollment_date, status) VALUES
             (1, 1, '2025-09-22', 'ENROLLED'),

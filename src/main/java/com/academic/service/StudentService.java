@@ -1,5 +1,6 @@
 package com.academic.service;
 
+import com.academic.dao.DatabaseManager;
 import com.academic.dao.StudentDao;
 import com.academic.dao.UserDao;
 import com.academic.model.Student;
@@ -7,6 +8,8 @@ import com.academic.model.User;
 import com.academic.util.PasswordUtil;
 import com.academic.util.ValidationUtil;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.List;
 
 /**
@@ -14,10 +17,12 @@ import java.util.List;
  */
 public class StudentService {
 
+    private final DatabaseManager dbManager;
     private final UserDao userDao;
     private final StudentDao studentDao;
 
     public StudentService() {
+        this.dbManager = DatabaseManager.getInstance();
         this.userDao = new UserDao();
         this.studentDao = new StudentDao();
     }
@@ -107,13 +112,62 @@ public class StudentService {
         if (ValidationUtil.isNullOrEmpty(programme)) {
             return ServiceResult.failure("Programme cannot be empty.");
         }
-        if (userDao.findByUsername(username) != null) {
+        try {
+            return dbManager.executeInTransaction(conn -> {
+                ServiceResult<Integer> result = registerStudentAccountInTransaction(
+                    conn, username, password, firstName, lastName, email, studentNumber, programme
+                );
+                if (!result.isSuccess()) {
+                    throw new SQLException(result.getMessage());
+                }
+                return result;
+            });
+        } catch (SQLException e) {
+            if (e.getMessage() != null && !e.getMessage().isBlank()) {
+                return ServiceResult.failure(e.getMessage());
+            }
+            return ServiceResult.failure("Registration failed due to a database error.");
+        }
+    }
+
+    public ServiceResult<Void> deleteStudent(Student student) {
+        if (student == null) {
+            return ServiceResult.failure("Please select a student to delete.");
+        }
+
+        try {
+            return dbManager.executeInTransaction(conn -> {
+                ServiceResult<Void> result = deleteStudentInTransaction(conn, student);
+                if (!result.isSuccess()) {
+                    throw new SQLException(result.getMessage());
+                }
+                return result;
+            });
+        } catch (SQLException e) {
+            if (e.getMessage() != null && !e.getMessage().isBlank()) {
+                return ServiceResult.failure(e.getMessage());
+            }
+            return ServiceResult.failure("Failed to delete student due to a database error.");
+        }
+    }
+
+    private ServiceResult<Integer> registerStudentAccountInTransaction(
+        Connection conn,
+        String username,
+        String password,
+        String firstName,
+        String lastName,
+        String email,
+        String studentNumber,
+        String programme
+    ) {
+        if (userDao.findByUsername(username, conn) != null) {
             return ServiceResult.failure("Username already taken.");
         }
 
         String hash = PasswordUtil.hashPassword(password);
         User user = new User(username, hash, User.Role.STUDENT);
-        int userId = userDao.create(user);
+        int userId = userDao.create(user, conn);
         if (userId == -1) {
             return ServiceResult.failure("Failed to create user account.");
         }
@@ -122,21 +176,21 @@ public class StudentService {
             userId, firstName.trim(), lastName.trim(),
             email.trim(), studentNumber.trim().toUpperCase(), programme.trim()
         );
-        int studentId = studentDao.create(student);
+        int studentId = studentDao.create(student, conn);
         if (studentId == -1) {
-            userDao.delete(userId);
             return ServiceResult.failure("Failed to create student. Student number may already exist.");
         }
 
         return ServiceResult.success("Student added successfully.", studentId);
     }
 
-    public ServiceResult<Void> deleteStudent(Student student) {
-        if (student == null) {
-            return ServiceResult.failure("Please select a student to delete.");
+    private ServiceResult<Void> deleteStudentInTransaction(Connection conn, Student student) {
+        boolean studentDeleted = studentDao.delete(student.getId(), conn);
+        boolean userDeleted = userDao.delete(student.getUserId(), conn);
+
+        if (!studentDeleted || !userDeleted) {
+            return ServiceResult.failure("Failed to delete student.");
         }
-        studentDao.delete(student.getId());
-        userDao.delete(student.getUserId());
         return ServiceResult.success("Student deleted successfully.");
     }
 }

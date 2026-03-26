@@ -5,9 +5,12 @@ import com.academic.model.Student;
 import com.academic.model.User;
 import com.academic.service.ServiceResult;
 import com.academic.service.StudentService;
+import com.academic.util.ErrorHandler;
 import com.academic.util.PasswordUtil;
 import com.academic.util.SessionManager;
 import com.academic.util.ValidationUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Controller for login and registration operations.
@@ -16,6 +19,7 @@ import com.academic.util.ValidationUtil;
  */
 public class LoginController {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(LoginController.class);
     private final UserDao userDao;
     private final StudentService studentService;
 
@@ -83,24 +87,31 @@ public class LoginController {
      */
     public LoginResult login(String username, String password) {
         if (ValidationUtil.isNullOrEmpty(username) || ValidationUtil.isNullOrEmpty(password)) {
+            ErrorHandler.logValidationFailure("login", "Missing username or password", username);
             return LoginResult.failure("Please enter both username and password.");
         }
 
+        LOGGER.info("Login attempt for username: {}", username);
         String hash = PasswordUtil.hashPassword(password);
         User user = userDao.authenticate(username, hash);
 
         if (user == null) {
+            ErrorHandler.logAuthEvent("LOGIN_FAILED", username, false, "Invalid credentials provided");
+            LOGGER.warn("Failed login attempt for username: {}", username);
             return LoginResult.failure("Invalid username or password.");
         }
 
         SessionManager.login(user);
+        ErrorHandler.logAuthEvent("LOGIN_SUCCESS", username, true, "User role: " + user.getRole());
 
         Student student = null;
         if (user.getRole() == User.Role.STUDENT) {
             student = studentService.findByUserId(user.getId());
             SessionManager.setCurrentStudent(student);
+            LOGGER.info("Student session set for user ID: {}", user.getId());
         }
 
+        LOGGER.info("User {} logged in successfully with role: {}", username, user.getRole());
         return LoginResult.success(user, student);
     }
 
