@@ -57,7 +57,7 @@ public class LoginView {
 
         // Password field
         Label passwordLabel = new Label("Password:");
-        PasswordField passwordField = new PasswordField();
+        PasswordToggleField passwordField = new PasswordToggleField();
         passwordField.setPromptText("Enter your password");
         passwordField.setMaxWidth(250);
 
@@ -83,7 +83,7 @@ public class LoginView {
         ));
 
         // Allow login via Enter key
-        passwordField.setOnAction(e -> handleLogin(
+        passwordField.setOnAction(() -> handleLogin(
             usernameField.getText(), passwordField.getText(), errorLabel
         ));
 
@@ -93,7 +93,7 @@ public class LoginView {
         loginBox.getChildren().addAll(
             title, subtitle,
             usernameLabel, usernameField,
-            passwordLabel, passwordField,
+            passwordLabel, passwordField.getNode(),
             loginButton, errorLabel,
             registerLink, hintLabel
         );
@@ -142,11 +142,11 @@ public class LoginView {
         usernameField.setPromptText("Username (3-20 alphanumeric)");
         usernameField.setMaxWidth(280);
 
-        PasswordField passwordField = new PasswordField();
+        PasswordToggleField passwordField = new PasswordToggleField();
         passwordField.setPromptText("Password (min 6 characters)");
         passwordField.setMaxWidth(280);
 
-        PasswordField confirmPasswordField = new PasswordField();
+        PasswordToggleField confirmPasswordField = new PasswordToggleField();
         confirmPasswordField.setPromptText("Confirm password");
         confirmPasswordField.setMaxWidth(280);
 
@@ -190,7 +190,7 @@ public class LoginView {
 
         registerBox.getChildren().addAll(
             title,
-            usernameField, passwordField, confirmPasswordField,
+            usernameField, passwordField.getNode(), confirmPasswordField.getNode(),
             firstNameField, lastNameField, emailField,
             studentNumberField, programmeField,
             registerButton, errorLabel, backLink
@@ -215,14 +215,20 @@ public class LoginView {
             return;
         }
 
-        AlertUtil.showInfo("Success", "Registration successful! You can now login.");
-        buildLoginForm();
+        LoginResult loginResult = controller.login(username, password);
+        if (!loginResult.isSuccess()) {
+            errorLabel.setText("Registration succeeded, but auto-login failed. Please login manually.");
+            buildLoginForm();
+            return;
+        }
+
+        showStudentDashboard();
     }
 
     /** Navigates to the student dashboard */
     private void showStudentDashboard() {
         StudentDashboardView dashboard = new StudentDashboardView(stage);
-        Scene scene = new Scene(dashboard.getRoot(), 900, 650);
+        Scene scene = SceneUtil.createScenePreservingSize(stage, dashboard.getRoot(), 900, 650);
         scene.getStylesheets().add(
             getClass().getResource("/css/style.css").toExternalForm()
         );
@@ -233,7 +239,7 @@ public class LoginView {
     /** Navigates to the admin dashboard */
     private void showAdminDashboard() {
         AdminDashboardView dashboard = new AdminDashboardView(stage);
-        Scene scene = new Scene(dashboard.getRoot(), 1050, 700);
+        Scene scene = SceneUtil.createScenePreservingSize(stage, dashboard.getRoot(), 1050, 700);
         scene.getStylesheets().add(
             getClass().getResource("/css/style.css").toExternalForm()
         );

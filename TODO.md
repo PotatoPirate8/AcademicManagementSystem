@@ -30,7 +30,7 @@ This backlog is prioritised by implementation importance and overall project imp
 | [x] | 4 | P2 | `TEST` | Expand automated tests: integration tests for DAOs, service tests, and edge-case workflow tests | Increases confidence and prevents regressions | 2026-03-18 15:40 | 2026-03-25 16:20 |
 | [ ] | 5 | P2 | `DEVX`, `TEST` | Add CI pipeline (GitHub Actions): run `mvn test` + static analysis (Checkstyle/SpotBugs/PMD) | Enforces quality checks on every push/PR | 2026-03-18 15:40 | - |
 | [x] | 6 | P2 | `ARCH`, `DEVX` | Centralize error handling and add structured logging (SLF4J + Logback) | Speeds up debugging and makes failures easier to diagnose | 2026-03-18 15:40 | 2026-03-25 17:30 |
-| [ ] | 7 | P3 | `UX`, `FEATURE` | Improve dashboard usability: search/filter/sort, pagination, and report export (CSV/PDF) | Makes the app more practical for larger datasets | 2026-03-18 15:40 | - |
+| [x] | 7 | P3 | `UX`, `FEATURE` | Improve dashboard usability: search/filter/sort, pagination, and report export (CSV/PDF) | Makes the app more practical for larger datasets | 2026-03-18 15:40 | 2026-03-31 12:00 |
 | [ ] | 8 | P3 | `DOC`, `DEVX` | Expand project documentation: architecture diagrams, workflow sequence diagrams, setup/testing guide improvements | Makes onboarding, maintenance, and coursework assessment clearer | 2026-03-18 15:40 | - |
 | [ ] | 9 | P4 | `FEATURE` | Add advanced academic capabilities: GPA/transcripts, prerequisites, attendance, lecturer comments | Extends project scope and demonstrates deeper domain modelling | 2026-03-18 15:40 | - |
 

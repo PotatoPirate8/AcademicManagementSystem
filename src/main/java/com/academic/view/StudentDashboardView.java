@@ -126,7 +126,10 @@ public class StudentDashboardView {
         statusCol.setCellValueFactory(new PropertyValueFactory<>("status"));
         statusCol.setPrefWidth(100);
 
-        myCoursesTable.getColumns().addAll(codeCol, nameCol, dateCol, statusCol);
+        myCoursesTable.getColumns().add(codeCol);
+        myCoursesTable.getColumns().add(nameCol);
+        myCoursesTable.getColumns().add(dateCol);
+        myCoursesTable.getColumns().add(statusCol);
 
         // Enable sorting
         TableUtil.enableColumnSorting(myCoursesTable);
@@ -195,7 +198,11 @@ public class StudentDashboardView {
         capacityCol.setCellValueFactory(new PropertyValueFactory<>("maxCapacity"));
         capacityCol.setPrefWidth(100);
 
-        availableCoursesTable.getColumns().addAll(codeCol, nameCol, creditsCol, lecturerCol, capacityCol);
+        availableCoursesTable.getColumns().add(codeCol);
+        availableCoursesTable.getColumns().add(nameCol);
+        availableCoursesTable.getColumns().add(creditsCol);
+        availableCoursesTable.getColumns().add(lecturerCol);
+        availableCoursesTable.getColumns().add(capacityCol);
 
         // Enable sorting
         TableUtil.enableColumnSorting(availableCoursesTable);
@@ -264,7 +271,12 @@ public class StudentDashboardView {
         dateCol.setCellValueFactory(new PropertyValueFactory<>("gradedDate"));
         dateCol.setPrefWidth(110);
 
-        gradesTable.getColumns().addAll(codeCol, nameCol, valueCol, letterCol, feedbackCol, dateCol);
+        gradesTable.getColumns().add(codeCol);
+        gradesTable.getColumns().add(nameCol);
+        gradesTable.getColumns().add(valueCol);
+        gradesTable.getColumns().add(letterCol);
+        gradesTable.getColumns().add(feedbackCol);
+        gradesTable.getColumns().add(dateCol);
 
         // Enable sorting
         TableUtil.enableColumnSorting(gradesTable);
@@ -432,7 +444,7 @@ public class StudentDashboardView {
     private void handleLogout() {
         controller.logout();
         LoginView loginView = new LoginView(stage);
-        Scene scene = new Scene(loginView.getRoot(), 400, 550);
+        Scene scene = SceneUtil.createScenePreservingSize(stage, loginView.getRoot(), 400, 550);
         scene.getStylesheets().add(
             getClass().getResource("/css/style.css").toExternalForm()
         );

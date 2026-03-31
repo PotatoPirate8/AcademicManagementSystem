@@ -15,8 +15,6 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.*;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -33,8 +31,6 @@ import javafx.util.StringConverter;
  * - Reports (filtered academic reports)
  */
 public class AdminDashboardView {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(AdminDashboardView.class);
 
     private final Stage stage;
     private final BorderPane root;
@@ -138,7 +134,12 @@ public class AdminDashboardView {
         progCol.setCellValueFactory(new PropertyValueFactory<>("programme"));
         progCol.setPrefWidth(150);
 
-        studentsTable.getColumns().addAll(idCol, numCol, fnCol, lnCol, emailCol, progCol);
+        studentsTable.getColumns().add(idCol);
+        studentsTable.getColumns().add(numCol);
+        studentsTable.getColumns().add(fnCol);
+        studentsTable.getColumns().add(lnCol);
+        studentsTable.getColumns().add(emailCol);
+        studentsTable.getColumns().add(progCol);
 
         // Enable sorting
         TableUtil.enableColumnSorting(studentsTable);
@@ -177,13 +178,15 @@ public class AdminDashboardView {
         progField.setPromptText("Programme");
         TextField usernameField = new TextField();
         usernameField.setPromptText("Username");
-        PasswordField passwordField = new PasswordField();
+        PasswordToggleField passwordField = new PasswordToggleField();
         passwordField.setPromptText("Password");
-        PasswordField confirmPasswordField = new PasswordField();
+        passwordField.setMaxWidth(220);
+        PasswordToggleField confirmPasswordField = new PasswordToggleField();
         confirmPasswordField.setPromptText("Confirm Password");
+        confirmPasswordField.setMaxWidth(220);
 
-        form.addRow(0, new Label("Username:"), usernameField, new Label("Password:"), passwordField);
-        form.addRow(1, new Label(""), new Label(""), new Label("Confirm Password:"), confirmPasswordField);
+        form.addRow(0, new Label("Username:"), usernameField, new Label("Password:"), passwordField.getNode());
+        form.addRow(1, new Label(""), new Label(""), new Label("Confirm Password:"), confirmPasswordField.getNode());
         form.addRow(2, new Label("First Name:"), fnField, new Label("Last Name:"), lnField);
         form.addRow(3, new Label("Email:"), emailField, new Label("Student No:"), snField);
         form.addRow(4, new Label("Programme:"), progField);
@@ -222,7 +225,9 @@ public class AdminDashboardView {
             if (result.isSuccess()) {
                 AlertUtil.showInfo("Success", result.getMessage());
                 refreshStudents();
-                clearFields(usernameField, passwordField, confirmPasswordField, fnField, lnField, emailField, snField, progField);
+                clearFields(usernameField, fnField, lnField, emailField, snField, progField);
+                passwordField.clear();
+                confirmPasswordField.clear();
             } else {
                 AlertUtil.showError("Error", result.getMessage());
             }
@@ -259,7 +264,9 @@ public class AdminDashboardView {
         });
 
         clearBtn.setOnAction(e -> {
-            clearFields(usernameField, passwordField, confirmPasswordField, fnField, lnField, emailField, snField, progField);
+            clearFields(usernameField, fnField, lnField, emailField, snField, progField);
+            passwordField.clear();
+            confirmPasswordField.clear();
             studentsTable.getSelectionModel().clearSelection();
         });
 
@@ -307,7 +314,11 @@ public class AdminDashboardView {
         deptCol.setCellValueFactory(new PropertyValueFactory<>("department"));
         deptCol.setPrefWidth(150);
 
-        lecturersTable.getColumns().addAll(idCol, fnCol, lnCol, emailCol, deptCol);
+        lecturersTable.getColumns().add(idCol);
+        lecturersTable.getColumns().add(fnCol);
+        lecturersTable.getColumns().add(lnCol);
+        lecturersTable.getColumns().add(emailCol);
+        lecturersTable.getColumns().add(deptCol);
 
     // Enable sorting
     TableUtil.enableColumnSorting(lecturersTable);
@@ -460,7 +471,12 @@ public class AdminDashboardView {
         capCol.setCellValueFactory(new PropertyValueFactory<>("maxCapacity"));
         capCol.setPrefWidth(80);
 
-        coursesTable.getColumns().addAll(idCol, codeCol, nameCol, credCol, lecCol, capCol);
+        coursesTable.getColumns().add(idCol);
+        coursesTable.getColumns().add(codeCol);
+        coursesTable.getColumns().add(nameCol);
+        coursesTable.getColumns().add(credCol);
+        coursesTable.getColumns().add(lecCol);
+        coursesTable.getColumns().add(capCol);
 
     // Enable sorting
     TableUtil.enableColumnSorting(coursesTable);
@@ -629,7 +645,12 @@ public class AdminDashboardView {
         statusCol.setCellValueFactory(new PropertyValueFactory<>("status"));
         statusCol.setPrefWidth(100);
 
-        enrollmentsTable.getColumns().addAll(idCol, studentCol, codeCol, courseCol, dateCol, statusCol);
+        enrollmentsTable.getColumns().add(idCol);
+        enrollmentsTable.getColumns().add(studentCol);
+        enrollmentsTable.getColumns().add(codeCol);
+        enrollmentsTable.getColumns().add(courseCol);
+        enrollmentsTable.getColumns().add(dateCol);
+        enrollmentsTable.getColumns().add(statusCol);
 
     // Enable sorting and prepare search panel
     TableUtil.enableColumnSorting(enrollmentsTable);
@@ -905,7 +926,13 @@ public class AdminDashboardView {
         dateCol.setCellValueFactory(new PropertyValueFactory<>("gradedDate"));
         dateCol.setPrefWidth(100);
 
-        gradesTable.getColumns().addAll(idCol, studentCol, codeCol, valueCol, letterCol, feedbackCol, dateCol);
+        gradesTable.getColumns().add(idCol);
+        gradesTable.getColumns().add(studentCol);
+        gradesTable.getColumns().add(codeCol);
+        gradesTable.getColumns().add(valueCol);
+        gradesTable.getColumns().add(letterCol);
+        gradesTable.getColumns().add(feedbackCol);
+        gradesTable.getColumns().add(dateCol);
 
     // Enable sorting and prepare search panel
     TableUtil.enableColumnSorting(gradesTable);
@@ -1067,6 +1094,15 @@ public class AdminDashboardView {
         Button generateBtn = new Button("Generate Report");
         generateBtn.getStyleClass().add("primary-button");
 
+        Button exportCsvBtn = new Button("Export CSV");
+        exportCsvBtn.getStyleClass().add("primary-button");
+
+        Button exportPdfBtn = new Button("Export PDF");
+        exportPdfBtn.getStyleClass().add("primary-button");
+
+        HBox reportActions = new HBox(10, generateBtn, exportCsvBtn, exportPdfBtn);
+        reportActions.setAlignment(Pos.CENTER_LEFT);
+
         // Update filter controls when report type changes
         reportTypeCombo.setOnAction(e -> {
             filterBox.getChildren().clear();
@@ -1109,10 +1145,51 @@ public class AdminDashboardView {
             generateReport(reportType, filterBox, reportOutput);
         });
 
-        content.getChildren().addAll(reportTitle, reportSelector, filterBox, generateBtn, reportOutput);
+        exportCsvBtn.setOnAction(e -> exportReport(reportTypeCombo, reportOutput, true));
+        exportPdfBtn.setOnAction(e -> exportReport(reportTypeCombo, reportOutput, false));
+
+        content.getChildren().addAll(reportTitle, reportSelector, filterBox, reportActions, reportOutput);
         VBox.setVgrow(reportOutput, Priority.ALWAYS);
         tab.setContent(content);
         return tab;
+    }
+
+    private void exportReport(ComboBox<String> reportTypeCombo, TextArea reportOutput, boolean exportCsv) {
+        String reportType = reportTypeCombo.getValue();
+        if (reportType == null) {
+            AlertUtil.showWarning("No Selection", "Please select and generate a report before exporting.");
+            return;
+        }
+
+        String reportText = reportOutput.getText();
+        if (reportText == null || reportText.isBlank()) {
+            AlertUtil.showWarning("No Report", "Please generate a report before exporting.");
+            return;
+        }
+
+        try {
+            boolean exported;
+            if (exportCsv) {
+                exported = ReportExportUtil.exportReportAsCsv(stage, reportType, reportText);
+                if (exported) {
+                    AlertUtil.showInfo("Export Complete", "Report exported successfully as CSV.");
+                }
+            } else {
+                exported = ReportExportUtil.exportReportAsPdf(stage, reportType, reportText);
+                if (exported) {
+                    AlertUtil.showInfo("Export Complete", "Report exported successfully as PDF.");
+                }
+            }
+
+            if (!exported) {
+                AlertUtil.showWarning("Export Cancelled", "Report export was cancelled or did not complete.");
+            }
+        } catch (IllegalArgumentException ex) {
+            AlertUtil.showWarning("Export Failed", ex.getMessage());
+        } catch (RuntimeException ex) {
+            String message = ErrorHandler.handleError("exporting report", ex);
+            AlertUtil.showError("Export Failed", message);
+        }
     }
 
     /** Generates the selected report and writes it to the output area */
@@ -1193,7 +1270,7 @@ public class AdminDashboardView {
     private void handleLogout() {
         controller.logout();
         LoginView loginView = new LoginView(stage);
-        Scene scene = new Scene(loginView.getRoot(), 400, 550);
+        Scene scene = SceneUtil.createScenePreservingSize(stage, loginView.getRoot(), 400, 550);
         scene.getStylesheets().add(
             getClass().getResource("/css/style.css").toExternalForm()
         );

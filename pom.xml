@@ -82,6 +82,13 @@
             <artifactId>logback-core</artifactId>
             <version>1.4.14</version>
         </dependency>
+
+        <!-- PDF export support -->
+        <dependency>
+            <groupId>org.apache.pdfbox</groupId>
+            <artifactId>pdfbox</artifactId>
+            <version>3.0.2</version>
+        </dependency>
     </dependencies>
 
     <build>
